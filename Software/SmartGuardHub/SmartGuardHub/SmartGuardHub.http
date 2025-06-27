@@ -1,0 +1,6 @@
+@SmartGuardHub_HostAddress = http://localhost:5083
+
+GET {{SmartGuardHub_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
