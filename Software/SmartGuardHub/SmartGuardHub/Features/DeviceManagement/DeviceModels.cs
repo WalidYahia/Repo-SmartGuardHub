@@ -15,16 +15,16 @@ namespace SmartGuardHub.Features.DeviceManagement
         public string DeviceId { get; set; } = string.Empty; // Sonoff device ID
 
         [Required]
-        public SwitchNo SwitchNo { get; set; }
+        public int SwitchNo { get; set; }
 
         [Required]
         public string Name { get; set; } = string.Empty;
 
         public string? Url { get; set; }
 
-        public DeviceType Type { get; set; }
+        public int Type { get; set; }
 
-        public DeviceProtocolType Protocol { get; set; }
+        public int Protocol { get; set; }
 
         public bool IsOnline { get; set; }
 
@@ -43,6 +43,8 @@ namespace SmartGuardHub.Features.DeviceManagement
     // DTOs for API 
     public class DeviceDTO
     {
+        public int Id { get; set; }
+
         [Required]
         public string DeviceId { get; set; } = string.Empty;
 

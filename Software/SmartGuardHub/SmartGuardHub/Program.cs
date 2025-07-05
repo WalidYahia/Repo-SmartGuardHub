@@ -1,9 +1,15 @@
+using Microsoft.EntityFrameworkCore;
 using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Configure Entity Framework with SQLite
+builder.Services.AddDbContext<SmartGuardDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -36,6 +42,13 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+// Ensure database is created
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<SmartGuardDbContext>();
+    context.Database.EnsureCreated();
 }
 
 app.UseHttpsRedirection();

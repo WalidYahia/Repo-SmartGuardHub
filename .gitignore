@@ -6,3 +6,6 @@ ProjectEvaluation
 /Software/SmartGuardHub/.vs/SmartGuardHub/DesignTimeBuild/.dtbcache.v2
 /Software/SmartGuardHub/.vs/SmartGuardHub/v17
 /Software/SmartGuardHub/.vs/SmartGuardHub/FileContentIndex/*.vsidx
+/Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite
+/Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite-shm
+/Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite-wal
