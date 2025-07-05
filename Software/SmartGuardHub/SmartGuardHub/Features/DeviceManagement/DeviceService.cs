@@ -4,21 +4,22 @@ using SmartGuardHub.Protocols;
 
 namespace SmartGuardHub.Features.DeviceManagement
 {
-    public class DeviceService
+    public class DeviceService : IAsyncInitializer
     {
         private readonly IDeviceRepository _deviceRepository;
         private readonly IEnumerable<IDeviceProtocol> _protocols;
-        private readonly IEnumerable<ISystemDevice> _systemDevices;
         private readonly ILogger<DeviceService> _logger;
 
-        public DeviceService(IDeviceRepository deviceRepository, IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, ILogger<DeviceService> logger)
+        public DeviceService(IDeviceRepository deviceRepository, IEnumerable<IDeviceProtocol> protocols, ILogger<DeviceService> logger)
         {
             _deviceRepository = deviceRepository;
             _protocols = protocols;
             _logger = logger;
-            _systemDevices = systemDevices;
+        }
 
-            RefreshDevices().GetAwaiter();
+        public async Task InitializeAsync()
+        {
+            await RefreshDevices();
         }
 
         public async Task RefreshDevices()

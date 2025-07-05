@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
 
@@ -27,6 +28,9 @@ builder.Services.AddHttpClient<RestProtocol>(client =>
 
 // Protocols
 builder.Services.AddScoped<IDeviceProtocol, RestProtocol>();
+builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
+builder.Services.AddScoped<ISystemDevice, SonOffMiniR>();
+builder.Services.AddScoped<IAsyncInitializer, DeviceService>();
 
 // Logging
 builder.Services.AddLogging(logging =>
@@ -49,6 +53,13 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<SmartGuardDbContext>();
     context.Database.EnsureCreated();
+}
+
+// Call async initialization before app starts handling requests
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<IAsyncInitializer>();
+    await initializer.InitializeAsync();
 }
 
 app.UseHttpsRedirection();
