@@ -7,13 +7,11 @@ namespace SmartGuardHub.Features.DeviceManagement
     public class DeviceService : IAsyncInitializer
     {
         private readonly IDeviceRepository _deviceRepository;
-        private readonly IEnumerable<IDeviceProtocol> _protocols;
         private readonly ILogger<DeviceService> _logger;
 
-        public DeviceService(IDeviceRepository deviceRepository, IEnumerable<IDeviceProtocol> protocols, ILogger<DeviceService> logger)
+        public DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceService> logger)
         {
             _deviceRepository = deviceRepository;
-            _protocols = protocols;
             _logger = logger;
         }
 
@@ -25,6 +23,8 @@ namespace SmartGuardHub.Features.DeviceManagement
         public async Task RefreshDevices()
         {
             SystemManager.Devices = (await GetAllDevicesAsync()).ToList();
+
+            _logger.LogInformation("Refreshed devices. Total devices: {Count}", SystemManager.Devices.Count);
         }
 
         public async Task<IEnumerable<DeviceDTO>> GetAllDevicesAsync()
@@ -62,11 +62,11 @@ namespace SmartGuardHub.Features.DeviceManagement
                 SwitchNo = (int)deviceDTO.SwitchNo,
                 Type = (int)deviceDTO.Type,
                 Protocol = (int)deviceDTO.Protocol,
-                LastSeen = DateTime.UtcNow,
+                LastSeen = deviceDTO.LastSeen,
                 FwVersion = deviceDTO.FwVersion,
                 CreatedAt = deviceDTO.CreatedAt,
                 RawResponse = deviceDTO.RawResponse,
-                IsOnline = false,
+                IsOnline = deviceDTO.IsOnline,
             };
 
             var createdDevice = await _deviceRepository.CreateAsync(device);

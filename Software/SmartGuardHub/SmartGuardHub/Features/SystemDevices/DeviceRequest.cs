@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace SmartGuardHub.Features.SystemDevices
 {
@@ -13,7 +14,7 @@ namespace SmartGuardHub.Features.SystemDevices
 
     public class DeviceRequestData
     {
-        [JsonProperty(PropertyName = "switches")]
+        [JsonProperty(PropertyName = "switches", NullValueHandling = NullValueHandling.Ignore)]
         public List<DeviceDataSwitch> Switches { get; set; }
     }
 }

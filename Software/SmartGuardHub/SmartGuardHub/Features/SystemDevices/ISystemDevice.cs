@@ -1,11 +1,22 @@
-﻿namespace SmartGuardHub.Features.SystemDevices
+﻿using System.Net.Sockets;
+using SmartGuardHub.Protocols;
+
+namespace SmartGuardHub.Features.SystemDevices
 {
     public interface ISystemDevice
     {
+        DeviceType DeviceType { get; }
+        DeviceProtocolType ProtocolType { get; }
+
+        string BaseUrl { get; }
+        string PortNo { get; }
+
         public DeviceRequest GetOnCommand(string deviceId, SwitchNo switchNo);
         public DeviceRequest GetOffCommand(string deviceId, SwitchNo switchNo);
         public DeviceRequest GetInfoCommand(string deviceId);
         public DeviceRequest GetSignalStrengthCommand(string deviceId);
+        public string GetDeviceUrl(string deviceId);
+        public DeviceProtocolType GetDeviceProtocol();
     }
 
     public enum DeviceType
@@ -20,13 +31,5 @@
         Second = 1,
         Third = 2,
         Fourth = 3,
-    }
-
-    public enum Request
-    {
-        On = 0,
-        Off = 1,
-        GetInfo = 2,
-        GetSignalStrength = 3,
     }
 }

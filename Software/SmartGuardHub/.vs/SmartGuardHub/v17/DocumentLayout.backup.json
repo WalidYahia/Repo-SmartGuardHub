@@ -3,44 +3,36 @@
   "WorkspaceRootPath": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\devicemanagement\\devicescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\devicemanagement\\devicescontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\systemdevices\\devicerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\systemdevices\\devicerequest.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\systemdevices\\sonoffminir.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\systemdevices\\sonoffminir.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\devicemanagement\\deviceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\devicemanagement\\deviceservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\devicemanagement\\idevicerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\devicemanagement\\idevicerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\devicemanagement\\devicemodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\devicemanagement\\devicemodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\infrastructure\\iasyncinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\infrastructure\\iasyncinitializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\devicemanagement\\devicerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\devicemanagement\\devicerepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\systemdevices\\isystemdevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\systemdevices\\isystemdevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\protocols\\ideviceprotocol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\protocols\\ideviceprotocol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\systemdevices\\deviceresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\systemdevices\\deviceresponse.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\features\\devicemanagement\\devicemodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\features\\devicemanagement\\devicemodels.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\protocols\\restprotocol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\protocols\\restprotocol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|f:\\work data\\w.a.s\\repo-smartguardhub\\software\\smartguardhub\\smartguardhub\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{3B3B578B-D83C-4E7F-A4D3-6035C44DFF27}|SmartGuardHub\\SmartGuardHub.csproj|solutionrelative:smartguardhub\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -50,128 +42,108 @@
       "DocumentGroups": [
         {
           "DockedHeight": 137,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "IAsyncInitializer.cs",
-              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Infrastructure\\IAsyncInitializer.cs",
-              "RelativeDocumentMoniker": "SmartGuardHub\\Infrastructure\\IAsyncInitializer.cs",
-              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Infrastructure\\IAsyncInitializer.cs",
-              "RelativeToolTip": "SmartGuardHub\\Infrastructure\\IAsyncInitializer.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-05T05:25:44.447Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "DeviceModels.cs",
-              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
-              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
-              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
-              "RelativeToolTip": "SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-05T03:52:50.596Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IDeviceRepository.cs",
-              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\IDeviceRepository.cs",
-              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\DeviceManagement\\IDeviceRepository.cs",
-              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\IDeviceRepository.cs",
-              "RelativeToolTip": "SmartGuardHub\\Features\\DeviceManagement\\IDeviceRepository.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAuwAgAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-04T13:27:38.331Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "DeviceRepository.cs",
-              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceRepository.cs",
-              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\DeviceManagement\\DeviceRepository.cs",
-              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceRepository.cs",
-              "RelativeToolTip": "SmartGuardHub\\Features\\DeviceManagement\\DeviceRepository.cs",
-              "ViewState": "AgIAAEMAAAAAAAAAAAArwEwAAAAfAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-04T13:26:52.434Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
               "Title": "ISystemDevice.cs",
               "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\ISystemDevice.cs",
               "RelativeDocumentMoniker": "SmartGuardHub\\Features\\SystemDevices\\ISystemDevice.cs",
               "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\ISystemDevice.cs",
               "RelativeToolTip": "SmartGuardHub\\Features\\SystemDevices\\ISystemDevice.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAiAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAfAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-04T13:22:00.443Z"
+              "WhenOpened": "2025-07-08T04:59:06.01Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "SonOffMiniR.cs",
+              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\SonOffMiniR.cs",
+              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\SystemDevices\\SonOffMiniR.cs",
+              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\SonOffMiniR.cs",
+              "RelativeToolTip": "SmartGuardHub\\Features\\SystemDevices\\SonOffMiniR.cs",
+              "ViewState": "AgIAADMAAAAAAAAAAADwvzoAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T06:23:03.575Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "DevicesController.cs",
+              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DevicesController.cs",
+              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\DeviceManagement\\DevicesController.cs",
+              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DevicesController.cs",
+              "RelativeToolTip": "SmartGuardHub\\Features\\DeviceManagement\\DevicesController.cs",
+              "ViewState": "AgIAAKYAAAAAAAAAAADwv68AAAAQAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T06:15:55.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "DeviceRequest.cs",
+              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\DeviceRequest.cs",
+              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\SystemDevices\\DeviceRequest.cs",
+              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\DeviceRequest.cs",
+              "RelativeToolTip": "SmartGuardHub\\Features\\SystemDevices\\DeviceRequest.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAowAwAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-06T04:07:15.247Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "DeviceModels.cs",
+              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
+              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
+              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
+              "RelativeToolTip": "SmartGuardHub\\Features\\DeviceManagement\\DeviceModels.cs",
+              "ViewState": "AgIAAC8AAAAAAAAAAAAUwDoAAAAUAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-05T03:52:50.596Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "DeviceService.cs",
               "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceService.cs",
               "RelativeDocumentMoniker": "SmartGuardHub\\Features\\DeviceManagement\\DeviceService.cs",
               "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\DeviceManagement\\DeviceService.cs",
               "RelativeToolTip": "SmartGuardHub\\Features\\DeviceManagement\\DeviceService.cs",
-              "ViewState": "AgIAABAAAAAAAAAAAAAlwB0AAABGAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAABKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-04T05:45:48.616Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 7,
               "Title": "Program.cs",
               "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Program.cs",
               "RelativeDocumentMoniker": "SmartGuardHub\\Program.cs",
               "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Program.cs",
               "RelativeToolTip": "SmartGuardHub\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAD4AAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAtwBwAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-07-02T04:43:14.95Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "WeatherForecastController.cs",
-              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Controllers\\WeatherForecastController.cs",
-              "RelativeDocumentMoniker": "SmartGuardHub\\Controllers\\WeatherForecastController.cs",
-              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Controllers\\WeatherForecastController.cs",
-              "RelativeToolTip": "SmartGuardHub\\Controllers\\WeatherForecastController.cs",
-              "ViewState": "AgIAABkAAAAAAAAAAAAzwCoAAABFAAAAAAAAAA==",
+              "DocumentIndex": 5,
+              "Title": "DeviceResponse.cs",
+              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\DeviceResponse.cs",
+              "RelativeDocumentMoniker": "SmartGuardHub\\Features\\SystemDevices\\DeviceResponse.cs",
+              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Features\\SystemDevices\\DeviceResponse.cs",
+              "RelativeToolTip": "SmartGuardHub\\Features\\SystemDevices\\DeviceResponse.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-07-02T04:47:26.601Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "IDeviceProtocol.cs",
-              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Protocols\\IDeviceProtocol.cs",
-              "RelativeDocumentMoniker": "SmartGuardHub\\Protocols\\IDeviceProtocol.cs",
-              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Protocols\\IDeviceProtocol.cs",
-              "RelativeToolTip": "SmartGuardHub\\Protocols\\IDeviceProtocol.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-29T04:20:41.659Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "RestProtocol.cs",
-              "DocumentMoniker": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Protocols\\RestProtocol.cs",
-              "RelativeDocumentMoniker": "SmartGuardHub\\Protocols\\RestProtocol.cs",
-              "ToolTip": "F:\\Work data\\W.A.S\\Repo-SmartGuardHub\\Software\\SmartGuardHub\\SmartGuardHub\\Protocols\\RestProtocol.cs",
-              "RelativeToolTip": "SmartGuardHub\\Protocols\\RestProtocol.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAgwDkAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-06-27T05:03:34.815Z"
+              "WhenOpened": "2025-07-06T04:07:16.243Z"
             }
           ]
         },
