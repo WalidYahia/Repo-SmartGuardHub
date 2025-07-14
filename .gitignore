@@ -9,3 +9,4 @@ ProjectEvaluation
 /Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite
 /Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite-shm
 /Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite-wal
+/Software/SmartGuardHub/SmartGuardHub/obj/*.cache

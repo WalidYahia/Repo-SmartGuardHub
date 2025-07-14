@@ -33,7 +33,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             return devices.Select(MapToDeviceDTO);
         }
 
-        public async Task<DeviceDTO?> GetDeviceAsync(string deviceId, SwitchNo switchNo)
+        public async Task<DeviceDTO?> GetDeviceAsync(string deviceId, SwitchOutlet switchNo)
         {
             var device = await _deviceRepository.GetByDeviceIdAndSwitchAsync(deviceId, (int)switchNo);
             return device != null ? MapToDeviceDTO(device) : null;
@@ -103,7 +103,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                 Name = device.Name,
                 DeviceId = device.DeviceId,
                 Url = device.Url,
-                SwitchNo = (SwitchNo)device.SwitchNo,
+                SwitchNo = (SwitchOutlet)device.SwitchNo,
                 Type = (DeviceType)device.Type,
                 Protocol = (DeviceProtocolType)device.Protocol,
                 IsOnline = device.IsOnline,

@@ -11,10 +11,13 @@ namespace SmartGuardHub.Features.SystemDevices
         string BaseUrl { get; }
         string PortNo { get; }
 
-        public DeviceRequest GetOnCommand(string deviceId, SwitchNo switchNo);
-        public DeviceRequest GetOffCommand(string deviceId, SwitchNo switchNo);
+        public DeviceRequest GetOnCommand(string deviceId, SwitchOutlet switchNo);
+        public DeviceRequest GetOffCommand(string deviceId, SwitchOutlet switchNo);
         public DeviceRequest GetInfoCommand(string deviceId);
         public DeviceRequest GetSignalStrengthCommand(string deviceId);
+        public DeviceRequest GetOnInchingCommand(string deviceId, SwitchOutlet switchNo, int InchingTime, List<DeviceDataPulse> devicePulses);
+        public DeviceRequest GetOffInchingCommand(string deviceId, SwitchOutlet switchNo, List<DeviceDataPulse> devicePulses);
+
         public string GetDeviceUrl(string deviceId);
         public DeviceProtocolType GetDeviceProtocol();
     }
@@ -25,7 +28,7 @@ namespace SmartGuardHub.Features.SystemDevices
         SonoffMiniR4M = 1,
     }
 
-    public enum SwitchNo
+    public enum SwitchOutlet
     {
         First = 0,
         Second = 1,

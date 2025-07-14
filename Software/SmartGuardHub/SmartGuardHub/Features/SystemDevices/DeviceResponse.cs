@@ -71,9 +71,17 @@ namespace SmartGuardHub.Features.SystemDevices
         public string Switch { get; set; }
 
         [JsonProperty(PropertyName = "outlet")]
-        public int Outlet { get; set; }
+        public SwitchOutlet Outlet { get; set; }
 
         [JsonProperty(PropertyName = "width")]
         public int Width { get; set; }
+
+        public DeviceDataPulse(SwitchOutlet outlet)
+        {
+            Outlet = outlet;
+            Width = 0; // Default width for pulse
+            Switch = "off"; // Default Switch for pulse
+            Pulse = "off"; // Default pulse state
+        }
     }
 }

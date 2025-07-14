@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Net.Sockets;
 using SmartGuardHub.Protocols;
 
@@ -13,7 +14,7 @@ namespace SmartGuardHub.Features.SystemDevices
 
         // http://eWeLink_10016ca843:8081/zeroconf/switches
 
-        public DeviceRequest GetOnCommand(string deviceId, SwitchNo switchNo)
+        public DeviceRequest GetOnCommand(string deviceId, SwitchOutlet switchNo)
         {
             return new DeviceRequest
             {
@@ -32,7 +33,7 @@ namespace SmartGuardHub.Features.SystemDevices
             };
         }
 
-        public DeviceRequest GetOffCommand(string deviceId, SwitchNo switchNo)
+        public DeviceRequest GetOffCommand(string deviceId, SwitchOutlet switchNo)
         {
             return new DeviceRequest
             {
@@ -66,6 +67,51 @@ namespace SmartGuardHub.Features.SystemDevices
             {
                 Deviceid = deviceId,
                 Data = new DeviceRequestData { }
+            };
+        }
+
+        //only supports multiples of 500 in range of 500~3599500
+        public DeviceRequest GetOnInchingCommand(string deviceId, SwitchOutlet switchNo, int InchingTime, List<DeviceDataPulse> devicePulses)
+        {
+            foreach (var pulse in devicePulses)
+            {
+                if (pulse.Outlet == switchNo)
+                {
+                    pulse.Switch = "on";
+                    pulse.Pulse = "on";
+                    pulse.Width = InchingTime;
+                }
+            }
+
+            return new DeviceRequest
+            {
+                Deviceid = deviceId,
+                Data = new DeviceRequestData
+                {
+                    Pulses = devicePulses
+                }
+            };
+        }
+
+        public DeviceRequest GetOffInchingCommand(string deviceId, SwitchOutlet switchNo, List<DeviceDataPulse> devicePulses)
+        {
+            foreach (var pulse in devicePulses)
+            {
+                if (pulse.Outlet == switchNo)
+                {
+                    pulse.Switch = "off";
+                    pulse.Pulse = "off";
+                    pulse.Width = 0;
+                }
+            }
+
+            return new DeviceRequest
+            {
+                Deviceid = deviceId,
+                Data = new DeviceRequestData
+                {
+                    Pulses = devicePulses
+                }
             };
         }
 

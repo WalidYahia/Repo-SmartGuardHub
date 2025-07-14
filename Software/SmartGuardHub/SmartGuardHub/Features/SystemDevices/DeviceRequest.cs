@@ -16,5 +16,8 @@ namespace SmartGuardHub.Features.SystemDevices
     {
         [JsonProperty(PropertyName = "switches", NullValueHandling = NullValueHandling.Ignore)]
         public List<DeviceDataSwitch> Switches { get; set; }
+
+        [JsonProperty(PropertyName = "pulses", NullValueHandling = NullValueHandling.Ignore)]
+        public List<DeviceDataPulse> Pulses { get; set; }
     }
 }

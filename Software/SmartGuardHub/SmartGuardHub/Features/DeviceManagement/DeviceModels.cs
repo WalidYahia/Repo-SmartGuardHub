@@ -49,7 +49,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         public string DeviceId { get; set; } = string.Empty;
 
         [Required]
-        public SwitchNo SwitchNo { get; set; }
+        public SwitchOutlet SwitchNo { get; set; }
 
         [Required]
         public string Name { get; set; } = string.Empty;

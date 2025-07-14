@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -8,6 +9,7 @@ using Newtonsoft.Json;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SmartGuardHub.Features.DeviceManagement
 {
@@ -29,26 +31,8 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
 
-
-        //[HttpGet]
-        //public async Task<IActionResult> GetAllDevices()
-        //{
-        //    var devices = await _deviceService.GetAllDevicesAsync();
-        //    return Ok(devices);
-        //}
-        //[HttpGet("{deviceId}/{switchNo}")]
-        //public async Task<IActionResult> GetDevice(string deviceId, int switchNo)
-        //{
-        //    var device = await _deviceService.GetDeviceAsync(deviceId, (SwitchNo)switchNo);
-        //    if (device == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return Ok(device);
-        //}
-
         [HttpPost("on")]
-        public object On(string deviceId, SwitchNo switchNo)
+        public object On(string deviceId, SwitchOutlet switchNo)
         {
             DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
 
@@ -70,7 +54,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("off")]
-        public object Off(string deviceId, SwitchNo switchNo)
+        public object Off(string deviceId, SwitchOutlet switchNo)
         {
             DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
 
@@ -116,7 +100,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("createDevice")]
-        public async Task<IActionResult> CreateDevice(DeviceType deviceType, string deviceId, SwitchNo switchNo, string name)
+        public async Task<IActionResult> CreateDevice(DeviceType deviceType, string deviceId, SwitchOutlet switchNo, string name)
         {
             if (string.IsNullOrEmpty(deviceId) || string.IsNullOrEmpty(name))
             {
@@ -171,6 +155,95 @@ namespace SmartGuardHub.Features.DeviceManagement
                 };
 
                 return new ObjectResult(problemDetails);
+            }
+        }
+
+        [HttpPost("renameDevice")]
+        public async Task<IActionResult> RenameDevice(int id, string name)
+        {
+            if (string.IsNullOrEmpty(name.Trim()))
+            {
+                return BadRequest("Device data is required.");
+            }
+
+            DeviceDTO selectedDevice = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+            if (selectedDevice == null)
+            {
+                return BadRequest("This device is not registered");
+            }
+
+            try
+            {
+                selectedDevice.Name = name;
+
+                var createdDevice = await _deviceService.UpdateDeviceAsync(selectedDevice);
+
+                await _deviceService.RefreshDevices();
+
+                return Ok(selectedDevice);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Title = "Internal Server Error",
+                    Detail = "An error occurred while processing the request."
+                };
+
+                return new ObjectResult(problemDetails);
+            }
+        }
+
+        [HttpPost("enableInchingMode")]
+        public object EnableInchingMode(int id, int inchingTimeInMs)
+        {
+            DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+
+            if (device != null)
+            {
+                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+                var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
+
+                DeviceResponse deviceInfo = JsonConvert.DeserializeObject<DeviceResponse>(GetInfo(device.DeviceId).ToString());
+
+                var inchingCommand = systemDevice.GetOnInchingCommand(device.DeviceId, device.SwitchNo, inchingTimeInMs, deviceInfo.Data.Pulses);
+                string jsonString = JsonConvert.SerializeObject(inchingCommand);
+
+                return protocol.SendCommandAsync(device.Url + "/zeroconf/pulses", jsonString).Result.Content.ReadAsStringAsync().Result;
+            }
+            else
+            {
+                _logger.LogWarning($"Device with ID {id})");
+                return NotFound($"Device with ID {id} not found.");
+            }
+        }
+
+        [HttpPost("disableInchingMode")]
+        public object DisableInchingMode(int id)
+        {
+            DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+
+            if (device != null)
+            {
+                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+                var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
+
+                DeviceResponse deviceInfo = JsonConvert.DeserializeObject<DeviceResponse>(GetInfo(device.DeviceId).ToString());
+
+                var inchingCommand = systemDevice.GetOffInchingCommand(device.DeviceId, device.SwitchNo, deviceInfo.Data.Pulses);
+                string jsonString = JsonConvert.SerializeObject(inchingCommand);
+
+                return protocol.SendCommandAsync(device.Url + "/zeroconf/pulses", jsonString).Result.Content.ReadAsStringAsync().Result;
+            }
+            else
+            {
+                _logger.LogWarning($"Device with ID {id})");
+                return NotFound($"Device with ID {id} not found.");
             }
         }
 
