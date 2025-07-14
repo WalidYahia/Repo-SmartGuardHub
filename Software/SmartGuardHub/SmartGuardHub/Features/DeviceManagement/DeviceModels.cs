@@ -3,6 +3,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SmartGuardHub.Features.SystemDevices;
+using SmartGuardHub.Features.Users;
 using SmartGuardHub.Protocols;
 
 namespace SmartGuardHub.Features.DeviceManagement
@@ -36,6 +37,9 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         // Device-specific properties as JSON
         public string? RawResponse { get; set; }
+
+        // Navigation property for Many-to-Many relationship
+        public ICollection<User_Device> UserDevices { get; set; } = new List<User_Device>();
     }
 
 

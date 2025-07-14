@@ -52,7 +52,8 @@ if (app.Environment.IsDevelopment())
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<SmartGuardDbContext>();
-    context.Database.EnsureCreated();
+    context.Database.Migrate(); // Apply migrations
+    DatabaseSeeder.SeedData(context); // Add seed data
 }
 
 // Call async initialization before app starts handling requests
