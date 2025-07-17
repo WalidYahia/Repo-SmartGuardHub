@@ -16,6 +16,8 @@ namespace SmartGuardHub.Features.Users
 
         public bool IsActive { get; set; } = true;
 
+        public bool CanPerformRemoteAction { get; set; } = false;
+
         // Navigation property for Many-to-Many relationship
         public ICollection<User_Device> UserDevices { get; set; } = new List<User_Device>();
     }
