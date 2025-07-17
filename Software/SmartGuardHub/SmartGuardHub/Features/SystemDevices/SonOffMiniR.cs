@@ -21,9 +21,9 @@ namespace SmartGuardHub.Features.SystemDevices
                 Deviceid = deviceId,
                 Data = new DeviceRequestData
                 {
-                    Switches = new List<DeviceDataSwitch>
+                    Switches = new List<SonoffMiniRPayloadDataSwitch>
                     {
-                        new DeviceDataSwitch
+                        new SonoffMiniRPayloadDataSwitch
                         {
                             Switch = "on",
                             Outlet = (int)switchNo
@@ -40,9 +40,9 @@ namespace SmartGuardHub.Features.SystemDevices
                 Deviceid = deviceId,
                 Data = new DeviceRequestData
                 {
-                    Switches = new List<DeviceDataSwitch>
+                    Switches = new List<SonoffMiniRPayloadDataSwitch>
                     {
-                        new DeviceDataSwitch
+                        new SonoffMiniRPayloadDataSwitch
                         {
                             Switch = "off",
                             Outlet = (int)switchNo
@@ -71,7 +71,7 @@ namespace SmartGuardHub.Features.SystemDevices
         }
 
         //only supports multiples of 500 in range of 500~3599500
-        public DeviceRequest GetOnInchingCommand(string deviceId, SwitchOutlet switchNo, int InchingTime, List<DeviceDataPulse> devicePulses)
+        public DeviceRequest GetOnInchingCommand(string deviceId, SwitchOutlet switchNo, int InchingTime, List<SonoffMiniRPayloadDataPulse> devicePulses)
         {
             foreach (var pulse in devicePulses)
             {
@@ -93,7 +93,7 @@ namespace SmartGuardHub.Features.SystemDevices
             };
         }
 
-        public DeviceRequest GetOffInchingCommand(string deviceId, SwitchOutlet switchNo, List<DeviceDataPulse> devicePulses)
+        public DeviceRequest GetOffInchingCommand(string deviceId, SwitchOutlet switchNo, List<SonoffMiniRPayloadDataPulse> devicePulses)
         {
             foreach (var pulse in devicePulses)
             {
@@ -123,6 +123,26 @@ namespace SmartGuardHub.Features.SystemDevices
         public DeviceProtocolType GetDeviceProtocol()
         {
             return DeviceProtocolType.Rest;
+        }
+
+        public DeviceResponse ParseResponse(DeviceResponse deviceResponse)
+        {
+            var devicePayload = Newtonsoft.Json.JsonConvert.DeserializeObject<SonoffMiniRResponsePayload>(deviceResponse.DevicePayload);
+
+            if (devicePayload.Error != 0)
+            {
+                return new DeviceResponse
+                {
+                    State = DeviceResponseState.BadRequest,
+                    DevicePayload = devicePayload
+                };
+            }
+
+            return new DeviceResponse
+            {
+                State = deviceResponse.State,
+                DevicePayload = devicePayload
+            };
         }
     }
 }

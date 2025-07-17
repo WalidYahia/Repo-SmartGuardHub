@@ -15,11 +15,13 @@ namespace SmartGuardHub.Features.SystemDevices
         public DeviceRequest GetOffCommand(string deviceId, SwitchOutlet switchNo);
         public DeviceRequest GetInfoCommand(string deviceId);
         public DeviceRequest GetSignalStrengthCommand(string deviceId);
-        public DeviceRequest GetOnInchingCommand(string deviceId, SwitchOutlet switchNo, int InchingTime, List<DeviceDataPulse> devicePulses);
-        public DeviceRequest GetOffInchingCommand(string deviceId, SwitchOutlet switchNo, List<DeviceDataPulse> devicePulses);
+        public DeviceRequest GetOnInchingCommand(string deviceId, SwitchOutlet switchNo, int InchingTime, List<SonoffMiniRPayloadDataPulse> devicePulses);
+        public DeviceRequest GetOffInchingCommand(string deviceId, SwitchOutlet switchNo, List<SonoffMiniRPayloadDataPulse> devicePulses);
 
         public string GetDeviceUrl(string deviceId);
         public DeviceProtocolType GetDeviceProtocol();
+        public DeviceResponse ParseResponse(DeviceResponse deviceResponse);
+
     }
 
     public enum DeviceType

@@ -1,4 +1,5 @@
 ﻿using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Features.SystemDevices;
 
 namespace SmartGuardHub.Protocols
 {
@@ -6,7 +7,7 @@ namespace SmartGuardHub.Protocols
     {
         DeviceProtocolType ProtocolType { get; }
 
-        Task<HttpResponseMessage> SendCommandAsync(string destination , string command, object? parameters = null);
+        Task<DeviceResponse> SendCommandAsync(string destination , string command, object? parameters = null);
 
         //Task<bool> DiscoverDevicesAsync();
 

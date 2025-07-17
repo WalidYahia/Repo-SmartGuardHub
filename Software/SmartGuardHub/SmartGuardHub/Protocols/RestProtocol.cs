@@ -3,6 +3,7 @@ using System.Text;
 using SmartGuardHub.Features.DeviceManagement;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
+using SmartGuardHub.Features.SystemDevices;
 
 namespace SmartGuardHub.Protocols
 {
@@ -19,7 +20,7 @@ namespace SmartGuardHub.Protocols
             _logger = logger;
         }
 
-        public async Task<HttpResponseMessage> SendCommandAsync(string destination, string command, object? parameters = null)
+        public async Task<DeviceResponse> SendCommandAsync(string destination, string command, object? parameters = null)
         {
             try
             {
@@ -32,32 +33,53 @@ namespace SmartGuardHub.Protocols
 
                 HttpResponseMessage response = await _httpClient.PostAsync(destination, content);
 
+
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
                     _logger.LogDebug("REST response: {Response}", responseContent);
+
+                    return new DeviceResponse
+                    {
+                        State = DeviceResponseState.OK,
+                        DevicePayload = responseContent
+                    };
                 }
                 else
                 {
                     _logger.LogWarning("REST command failed with status {Status} for device {DeviceId}",
-                        response.StatusCode, destination);
+                        response.StatusCode, destination); 
+                    
+                    DeviceResponse deviceResponse = new DeviceResponse();
 
-                    var responseContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("REST response: {Response}", responseContent);
+                    switch (response.StatusCode)
+                    {
+                        case System.Net.HttpStatusCode.BadRequest:
+                            deviceResponse.State = DeviceResponseState.BadRequest;
+                            break;
+
+                        case System.Net.HttpStatusCode.NotFound:
+                            deviceResponse.State = DeviceResponseState.NotFound;
+                            break;
+
+                        case System.Net.HttpStatusCode.RequestTimeout:
+                            deviceResponse.State = DeviceResponseState.Timeout;
+                            break;
+
+                        default:
+                            deviceResponse.State = DeviceResponseState.Error;
+                            break;
+                    }
+
+                    return deviceResponse;
                 }
-
-                return response;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send REST command {Command} to device {DeviceId}", command, destination);
-                return null;
+                return new DeviceResponse();
             }
         }
-
-
-        ConcurrentDictionary<string, DeviceStatusResponse> _deviceStatuses = new ConcurrentDictionary<string, DeviceStatusResponse>();
-
 
         //public async Task<bool> DiscoverDevicesAsync()
         //{

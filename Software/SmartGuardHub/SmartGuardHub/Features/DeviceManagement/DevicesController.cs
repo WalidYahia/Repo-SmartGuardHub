@@ -18,86 +18,18 @@ namespace SmartGuardHub.Features.DeviceManagement
     public class DevicesController : ControllerBase
     {
         private readonly DeviceService _deviceService;
+        private readonly DeviceCommunicationManager _deviceCommunicationManager;
         private readonly IEnumerable<ISystemDevice> _systemDevices;
-        private readonly IEnumerable<IDeviceProtocol> _protocols;
         private readonly ILogger<DevicesController> _logger;
-        
-        public DevicesController(DeviceService deviceService, IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, ILogger<DevicesController> logger)
+
+        public DevicesController(DeviceService deviceService, DeviceCommunicationManager deviceCommunicationManager, IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, ILogger<DevicesController> logger)
         {
             _deviceService = deviceService;
             _logger = logger;
             _systemDevices = systemDevices;
-            _protocols = protocols;
+            _deviceCommunicationManager = deviceCommunicationManager;
         }
 
-
-        [HttpPost("on")]
-        public object On(string deviceId, SwitchOutlet switchNo)
-        {
-            DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
-
-            if (device != null)
-            {
-                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
-                var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
-                var command = systemDevice.GetOnCommand(deviceId, switchNo);
-
-                string jsonString = JsonConvert.SerializeObject(command);
-
-                return protocol.SendCommandAsync(device.Url + "/zeroconf/switches", jsonString).Result.Content.ReadAsStringAsync().Result;
-            }
-            else
-            {
-                _logger.LogWarning($"Device with ID {deviceId} and switch no. {switchNo} not found.");
-                return NotFound($"Device with ID {deviceId} and switch no. {switchNo} not found.");
-            }
-        }
-
-        [HttpPost("off")]
-        public object Off(string deviceId, SwitchOutlet switchNo)
-        {
-            DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
-
-            if (device != null)
-            {
-                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
-                var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
-                var command = systemDevice.GetOffCommand(deviceId, switchNo);
-
-                string jsonString = JsonConvert.SerializeObject(command);
-
-                return protocol.SendCommandAsync(device.Url + "/zeroconf/switches", jsonString).Result.Content.ReadAsStringAsync().Result;
-            }
-            else
-            {
-                _logger.LogWarning($"Device with ID {deviceId} and switch no. {switchNo} not found.");
-                return NotFound($"Device with ID {deviceId} and switch no. {switchNo} not found.");
-            }
-
-        }
-
-        [HttpPost("getInfo")]
-        public object GetInfo(string deviceId)
-        {
-            DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId);
-
-            if (device != null)
-            {
-                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
-                var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
-                var command = systemDevice.GetInfoCommand(deviceId);
-
-                string jsonString = JsonConvert.SerializeObject(command);
-
-                return protocol.SendCommandAsync(device.Url + "/zeroconf/info", jsonString).Result.Content.ReadAsStringAsync().Result;
-            }
-            else
-            {
-                _logger.LogWarning($"Device with ID {deviceId} not found.");
-                return NotFound($"Device with ID {deviceId} not found.");
-            }
-
-        }
 
         [HttpPost("createDevice")]
         public async Task<IActionResult> CreateDevice(DeviceType deviceType, string deviceId, SwitchOutlet switchNo, string name)
@@ -108,7 +40,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             }
 
             DeviceDTO deviceCheck1 = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
-            if(deviceCheck1 != null)
+            if (deviceCheck1 != null)
             {
                 return BadRequest("Device already registered.");
             }
@@ -199,54 +131,6 @@ namespace SmartGuardHub.Features.DeviceManagement
             }
         }
 
-        [HttpPost("enableInchingMode")]
-        public object EnableInchingMode(int id, int inchingTimeInMs)
-        {
-            DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
-
-            if (device != null)
-            {
-                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
-                var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
-
-                DeviceResponse deviceInfo = JsonConvert.DeserializeObject<DeviceResponse>(GetInfo(device.DeviceId).ToString());
-
-                var inchingCommand = systemDevice.GetOnInchingCommand(device.DeviceId, device.SwitchNo, inchingTimeInMs, deviceInfo.Data.Pulses);
-                string jsonString = JsonConvert.SerializeObject(inchingCommand);
-
-                return protocol.SendCommandAsync(device.Url + "/zeroconf/pulses", jsonString).Result.Content.ReadAsStringAsync().Result;
-            }
-            else
-            {
-                _logger.LogWarning($"Device with ID {id})");
-                return NotFound($"Device with ID {id} not found.");
-            }
-        }
-
-        [HttpPost("disableInchingMode")]
-        public object DisableInchingMode(int id)
-        {
-            DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
-
-            if (device != null)
-            {
-                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
-                var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
-
-                DeviceResponse deviceInfo = JsonConvert.DeserializeObject<DeviceResponse>(GetInfo(device.DeviceId).ToString());
-
-                var inchingCommand = systemDevice.GetOffInchingCommand(device.DeviceId, device.SwitchNo, deviceInfo.Data.Pulses);
-                string jsonString = JsonConvert.SerializeObject(inchingCommand);
-
-                return protocol.SendCommandAsync(device.Url + "/zeroconf/pulses", jsonString).Result.Content.ReadAsStringAsync().Result;
-            }
-            else
-            {
-                _logger.LogWarning($"Device with ID {id})");
-                return NotFound($"Device with ID {id} not found.");
-            }
-        }
-
         [HttpGet("loadDevices")]
         public async Task<IActionResult> LoadAllDevices()
         {
@@ -266,6 +150,212 @@ namespace SmartGuardHub.Features.DeviceManagement
                 };
 
                 return new ObjectResult(problemDetails);
+            }
+        }
+
+        [HttpPost("on")]
+        public async Task<IActionResult> On(string deviceId, SwitchOutlet switchNo)
+        {
+            try
+            {
+                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+
+                if (device != null)
+                {
+                    var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+                    var command = systemDevice.GetOnCommand(deviceId, switchNo);
+
+                    string jsonString = JsonConvert.SerializeObject(command);
+
+                    var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/switches", jsonString);
+
+                    return Ok(result);
+                }
+                else
+                {
+                    _logger.LogWarning($"Device with ID {deviceId} and switch no. {switchNo} not found.");
+
+                    return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
+                }
+            }
+            catch (Exception ex)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message
+                };
+
+                return new ObjectResult(problemDetails);
+            }
+        }
+
+        [HttpPost("off")]
+        public async Task<IActionResult> Off(string deviceId, SwitchOutlet switchNo)
+        {
+            try
+            {
+                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+
+                if (device != null)
+                {
+                    var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+                    var command = systemDevice.GetOffCommand(deviceId, switchNo);
+
+                    string jsonString = JsonConvert.SerializeObject(command);
+
+                    var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/switches", jsonString);
+
+                    return Ok(result);
+                }
+                else
+                {
+                    _logger.LogWarning($"Device with ID {deviceId} and switch no. {switchNo} not found.");
+
+                    return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
+                }
+            }
+            catch (Exception ex)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message
+                };
+
+                return new ObjectResult(problemDetails);
+            }
+        }
+
+        [HttpPost("getInfo")]
+        public async Task<IActionResult> GetInfo(string deviceId)
+        {
+            try
+            {
+                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId);
+
+                var result = await GetInfoResponse(device);
+
+                if (result != null)
+                    return Ok(result);
+                else
+                {
+                    _logger.LogWarning($"Device with ID {deviceId} not found.");
+
+                    return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
+                }
+            }
+            catch (Exception ex)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message
+                };
+
+                return new ObjectResult(problemDetails);
+            }
+        }
+
+        [HttpPost("enableInchingMode")]
+        public async Task<IActionResult> EnableInchingMode(int id, int inchingTimeInMs)
+        {
+            try
+            {
+                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+
+                if (device != null)
+                {
+                    var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+
+                    DeviceResponse infoResponse = await GetInfoResponse(device);
+
+                    var inchingCommand = systemDevice.GetOnInchingCommand(device.DeviceId, device.SwitchNo, inchingTimeInMs, (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
+
+                    string jsonString = JsonConvert.SerializeObject(inchingCommand);
+
+                    var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/pulses", jsonString);
+
+                    return Ok(result);
+                }
+                else
+                {
+                    _logger.LogWarning($"Device with ID {id})");
+
+                    return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
+                }
+            }
+            catch (Exception ex)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message
+                };
+
+                return new ObjectResult(problemDetails);
+            }
+        }
+
+        [HttpPost("disableInchingMode")]
+        public async Task<IActionResult> DisableInchingMode(int id)
+        {
+            try
+            {
+
+                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+
+                if (device != null)
+                {
+                    var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+
+                    DeviceResponse infoResponse = await GetInfoResponse(device);
+
+                    var inchingCommand = systemDevice.GetOffInchingCommand(device.DeviceId, device.SwitchNo, (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
+
+                    string jsonString = JsonConvert.SerializeObject(inchingCommand);
+
+                    var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/pulses", jsonString);
+
+                    return Ok(result);
+                }
+                else
+                {
+                    _logger.LogWarning($"Device with ID {id})");
+
+                    return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
+                }
+            }
+            catch (Exception ex)
+            {
+                var problemDetails = new ProblemDetails
+                {
+                    Status = (int)HttpStatusCode.InternalServerError,
+                    Title = "Internal Server Error",
+                    Detail = ex.Message
+                };
+
+                return new ObjectResult(problemDetails);
+            }
+        }
+
+
+        private async Task<DeviceResponse> GetInfoResponse(DeviceDTO device)
+        {
+            if (device != null)
+            {
+                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+                var command = systemDevice.GetInfoCommand(device.DeviceId);
+                string jsonString = JsonConvert.SerializeObject(command);
+                return await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/info", jsonString);
+            }
+            else
+            {
+                return null;
             }
         }
     }

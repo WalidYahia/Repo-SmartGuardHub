@@ -74,6 +74,7 @@ namespace SmartGuardHub.Features.DeviceManagement
 
             return createdDevice;
         }
+
         public async Task<Device> UpdateDeviceAsync(DeviceDTO deviceDTO)
         {
             var device = MapToDevice(deviceDTO);

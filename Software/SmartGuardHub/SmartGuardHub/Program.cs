@@ -20,6 +20,8 @@ builder.Services.AddSwaggerGen();
 // Device Management
 builder.Services.AddScoped<DeviceService>();
 
+builder.Services.AddScoped<DeviceCommunicationManager>();
+
 // HTTP Client for REST protocol
 builder.Services.AddHttpClient<RestProtocol>(client =>
 {

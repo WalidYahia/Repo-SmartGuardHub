@@ -15,9 +15,9 @@ namespace SmartGuardHub.Features.SystemDevices
     public class DeviceRequestData
     {
         [JsonProperty(PropertyName = "switches", NullValueHandling = NullValueHandling.Ignore)]
-        public List<DeviceDataSwitch> Switches { get; set; }
+        public List<SonoffMiniRPayloadDataSwitch> Switches { get; set; }
 
         [JsonProperty(PropertyName = "pulses", NullValueHandling = NullValueHandling.Ignore)]
-        public List<DeviceDataPulse> Pulses { get; set; }
+        public List<SonoffMiniRPayloadDataPulse> Pulses { get; set; }
     }
 }
