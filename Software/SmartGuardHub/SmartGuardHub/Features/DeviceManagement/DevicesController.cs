@@ -64,7 +64,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                     Url = systemDevice.BaseUrl + deviceId + ":" + systemDevice.PortNo,
                     Protocol = systemDevice.ProtocolType,
                     IsOnline = false,
-                    CreatedAt = DateTime.UtcNow,
+                    CreatedAt = SystemManager.TimeNow(),
                 };
 
                 var createdDevice = await _deviceService.CreateDeviceAsync(deviceDTO);

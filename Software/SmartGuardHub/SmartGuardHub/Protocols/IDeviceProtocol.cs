@@ -1,5 +1,6 @@
 ﻿using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.SystemDevices;
+using SmartGuardHub.Infrastructure;
 
 namespace SmartGuardHub.Protocols
 {
@@ -22,7 +23,7 @@ namespace SmartGuardHub.Protocols
     {
         public bool IsOnline { get; set; }
         public Dictionary<string, object> Properties { get; set; } = new();
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public DateTime Timestamp { get; set; } = SystemManager.TimeNow();
     }
 
     public enum DeviceProtocolType

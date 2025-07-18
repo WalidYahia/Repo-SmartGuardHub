@@ -29,8 +29,8 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         public async Task<Device> CreateAsync(Device device)
         {
-            device.CreatedAt = DateTime.UtcNow;
-            device.LastSeen = DateTime.UtcNow;
+            device.CreatedAt = SystemManager.TimeNow();
+            device.LastSeen = SystemManager.TimeNow();
 
             _context.Devices.Add(device);
             await _context.SaveChangesAsync();
@@ -76,7 +76,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             var device = await GetByIdAsync(id);
             if (device != null)
             {
-                device.LastSeen = DateTime.UtcNow;
+                device.LastSeen = SystemManager.TimeNow();
                 device.IsOnline = true;
                 await UpdateAsync(device);
             }
