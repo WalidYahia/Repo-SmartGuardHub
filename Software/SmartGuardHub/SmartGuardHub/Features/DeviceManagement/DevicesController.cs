@@ -4,8 +4,10 @@ using System.Net.Sockets;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
@@ -17,15 +19,15 @@ namespace SmartGuardHub.Features.DeviceManagement
     [ApiController]
     public class DevicesController : ControllerBase
     {
+        private readonly LoggingService _loggingService;
         private readonly DeviceService _deviceService;
         private readonly DeviceCommunicationManager _deviceCommunicationManager;
         private readonly IEnumerable<ISystemDevice> _systemDevices;
-        private readonly ILogger<DevicesController> _logger;
 
-        public DevicesController(DeviceService deviceService, DeviceCommunicationManager deviceCommunicationManager, IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, ILogger<DevicesController> logger)
+        public DevicesController(DeviceService deviceService, DeviceCommunicationManager deviceCommunicationManager, IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, LoggingService loggingService)
         {
             _deviceService = deviceService;
-            _logger = logger;
+            _loggingService = loggingService;
             _systemDevices = systemDevices;
             _deviceCommunicationManager = deviceCommunicationManager;
         }
@@ -73,12 +75,16 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                 return Ok(deviceDTO);
             }
-            catch (InvalidOperationException ex)
+            catch (DbUpdateException ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesConflict, $"ConflictError - CreateDevice", ex);
+
                 return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"Error - CreateDevice", ex);
+                
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
@@ -114,12 +120,15 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                 return Ok(selectedDevice);
             }
-            catch (InvalidOperationException ex)
+            catch (DbUpdateException ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"ConflictError - RenameDevice", ex);
                 return Conflict(ex.Message);
             }
             catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"Error - RenameDevice", ex);
+
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
@@ -140,8 +149,10 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                 return Ok(SystemManager.Devices);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"Error - LoadAllDevices", ex);
+
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
@@ -173,13 +184,15 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    _logger.LogWarning($"Device with ID {deviceId} and switch no. {switchNo} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {deviceId}-{(int)switchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while turning on the device {deviceId}-{(int)switchNo}", ex);
+
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
@@ -211,13 +224,15 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    _logger.LogWarning($"Device with ID {deviceId} and switch no. {switchNo} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"Off - Device with ID {deviceId}-{(int)switchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while turning off the device {deviceId}-{(int)switchNo}", ex);
+
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
@@ -242,13 +257,15 @@ namespace SmartGuardHub.Features.DeviceManagement
                     return Ok(result);
                 else
                 {
-                    _logger.LogWarning($"Device with ID {deviceId} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"Info - Device with ID {deviceId} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while get info of the device {deviceId}", ex);
+                
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
@@ -283,13 +300,15 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    _logger.LogWarning($"Device with ID {id})");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOn - Device with ID {id} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOn device {id}", ex);
+
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,
@@ -325,13 +344,15 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    _logger.LogWarning($"Device with ID {id})");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOff - Device with ID {id} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOff device {id}", ex);
+                
                 var problemDetails = new ProblemDetails
                 {
                     Status = (int)HttpStatusCode.InternalServerError,

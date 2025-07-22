@@ -4,20 +4,20 @@ using SmartGuardHub.Features.DeviceManagement;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using SmartGuardHub.Features.SystemDevices;
+using SmartGuardHub.Features.Logging;
 
 namespace SmartGuardHub.Protocols
 {
     public class RestProtocol : IDeviceProtocol
     {
+        private readonly LoggingService _loggingService;
         private readonly HttpClient _httpClient;
-        private readonly ILogger<RestProtocol> _logger;
-
         public DeviceProtocolType ProtocolType => DeviceProtocolType.Rest;
 
-        public RestProtocol(HttpClient httpClient, ILogger<RestProtocol> logger)
+        public RestProtocol(HttpClient httpClient, LoggingService loggingService)
         {
             _httpClient = httpClient;
-            _logger = logger;
+            _loggingService = loggingService;
         }
 
         public async Task<DeviceResponse> SendCommandAsync(string destination, string command, object? parameters = null)
@@ -29,15 +29,12 @@ namespace SmartGuardHub.Protocols
 
                 var content = new StringContent(command, Encoding.UTF8, "application/json");
 
-                _logger.LogDebug("Sending REST command to {Url}: {Command}", destination, command);
-
                 HttpResponseMessage response = await _httpClient.PostAsync(destination, content);
 
 
                 if (response.IsSuccessStatusCode)
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogDebug("REST response: {Response}", responseContent);
 
                     return new DeviceResponse
                     {
@@ -46,10 +43,7 @@ namespace SmartGuardHub.Protocols
                     };
                 }
                 else
-                {
-                    _logger.LogWarning("REST command failed with status {Status} for device {DeviceId}",
-                        response.StatusCode, destination); 
-                    
+                {                    
                     DeviceResponse deviceResponse = new DeviceResponse();
 
                     switch (response.StatusCode)
@@ -76,7 +70,8 @@ namespace SmartGuardHub.Protocols
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send REST command {Command} to device {DeviceId}", command, destination);
+                await _loggingService.LogErrorAsync(LogMessageKey.RestProtocol, $"Failed to send REST command {command} to device {destination}", ex);
+
                 return new DeviceResponse();
             }
         }
