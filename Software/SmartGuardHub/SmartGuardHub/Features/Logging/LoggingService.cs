@@ -119,19 +119,23 @@ namespace SmartGuardHub.Features.Logging
                 if (totalCount > countToKeep)
                 {
                     int excessCount = totalCount - countToKeep;
+
                     await _logRepository.TrimOldRowsAsync(excessCount);
-                    Console.WriteLine($"Cleanup {excessCount}, log count Was {totalCount}");
+
+                    await LogInfoAsync(LogMessageKey.LogsCleanupCycle, $"Cleanup {excessCount}, log count Was {totalCount}");
                 }
                 else
                 {
                     var cutoffDate = DateTime.UtcNow.AddDays(-daysToKeep);
+
                     await _logRepository.DeleteLogsOlderThanTime(cutoffDate);
-                    Console.WriteLine($"Cleanup cutoffDate {cutoffDate}, log count Was {totalCount}");
+
+                    await LogInfoAsync(LogMessageKey.LogsCleanupCycle, $"Cleanup cutoffDate {cutoffDate}, log count Was {totalCount}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Failed to CleanupOldLogsAsync: daysToKeep: {daysToKeep} - countToKeep: {countToKeep} - {ex}");
+                await LogErrorAsync(LogMessageKey.LogsCleanupError, $"Failed to CleanupOldLogsAsync: daysToKeep: {daysToKeep} - countToKeep: {countToKeep}", ex);
             }
         }
     }

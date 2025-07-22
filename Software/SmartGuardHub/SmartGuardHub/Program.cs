@@ -22,12 +22,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Device Management
+
 builder.Services.AddScoped<DeviceService>();
 
 builder.Services.AddScoped<LoggingService>();
 
 builder.Services.AddScoped<DeviceCommunicationManager>();
+
+builder.Services.AddHostedService<LogCleanupService>();
 
 // HTTP Client for REST protocol
 builder.Services.AddHttpClient<RestProtocol>(client =>

@@ -25,5 +25,7 @@ namespace SmartGuardHub.Features.Logging
         DevicesConflict = 1,
         RestProtocol = 2,
         Message1 = 3,
+        LogsCleanupCycle = 4,
+        LogsCleanupError = 4,
     }
 }
