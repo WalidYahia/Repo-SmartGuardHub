@@ -1,10 +1,13 @@
-﻿using SmartGuardHub.Features.DeviceManagement;
+﻿using System.Collections.Concurrent;
+using SmartGuardHub.Features.DeviceManagement;
 
 namespace SmartGuardHub.Infrastructure
 {
     public class SystemManager
     {
-        public static List<DeviceDTO> Devices = new List<DeviceDTO>();
+        //public List<DeviceDTO> Devices = new List<DeviceDTO>();
+        public static ConcurrentBag<DeviceDTO> Devices = new ConcurrentBag<DeviceDTO>();
+
 
         public static DateTime TimeNow()
         {

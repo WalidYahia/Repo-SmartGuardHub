@@ -17,7 +17,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         public async Task<IEnumerable<Device>> GetAllAsync()
         {
             return await _context.Devices
-                .OrderBy(d => d.Name)
+                .OrderByDescending(d => d.Name)
                 .ToListAsync();
         }
 
