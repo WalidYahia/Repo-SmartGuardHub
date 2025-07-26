@@ -97,14 +97,14 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("renameDevice")]
-        public async Task<IActionResult> RenameDevice(int id, string name)
+        public async Task<IActionResult> RenameDevice(string deviceId, SwitchOutlet switchNo, string name)
         {
             if (string.IsNullOrEmpty(name.Trim()))
             {
                 return BadRequest("Device data is required.");
             }
 
-            DeviceDTO selectedDevice = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+            DeviceDTO selectedDevice = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
             if (selectedDevice == null)
             {
                 return BadRequest("This device is not registered");
@@ -278,11 +278,11 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("enableInchingMode")]
-        public async Task<IActionResult> EnableInchingMode(int id, int inchingTimeInMs)
+        public async Task<IActionResult> EnableInchingMode(string deviceId, SwitchOutlet switchNo, int inchingTimeInMs)
         {
             try
             {
-                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
 
                 if (device != null)
                 {
@@ -300,14 +300,14 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOn - Device with ID {id} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOn - Device with ID {deviceId}-{(int)switchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
-                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOn device {id}", ex);
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOn Device with ID {deviceId}-{(int)switchNo}", ex);
 
                 var problemDetails = new ProblemDetails
                 {
@@ -321,12 +321,12 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("disableInchingMode")]
-        public async Task<IActionResult> DisableInchingMode(int id)
+        public async Task<IActionResult> DisableInchingMode(string deviceId, SwitchOutlet switchNo)
         {
             try
             {
 
-                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.Id == id);
+                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
 
                 if (device != null)
                 {
@@ -344,14 +344,14 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOff - Device with ID {id} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOff - Device with Device with ID {deviceId}-{(int)switchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
-                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOff device {id}", ex);
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOff Device with ID {deviceId}-{(int)switchNo}", ex);
                 
                 var problemDetails = new ProblemDetails
                 {
