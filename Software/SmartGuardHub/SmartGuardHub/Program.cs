@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Configure Entity Framework with SQLite
 builder.Services.AddDbContext<SmartGuardDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("MainDatabaseConnection")));
 
 builder.Services.AddDbContext<SystemLogDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("SystemLogDatabaseConnection")));
@@ -30,6 +30,7 @@ builder.Services.AddScoped<LoggingService>();
 builder.Services.AddScoped<DeviceCommunicationManager>();
 
 builder.Services.AddHostedService<LogCleanupService>();
+
 
 // HTTP Client for REST protocol
 builder.Services.AddHttpClient<RestProtocol>(client =>
