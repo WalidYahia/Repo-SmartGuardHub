@@ -22,9 +22,9 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         public async Task RefreshDevices()
         {
-            SystemManager.Devices = new (await GetAllDevicesAsync());
+            SystemManager.Units = new (await GetAllDevicesAsync());
 
-            _logger.LogInformation("Refreshed devices. Total devices: {Count}", SystemManager.Devices.Count);
+            _logger.LogInformation("Refreshed devices. Total devices: {Count}", SystemManager.Units.Count);
         }
 
         public async Task<IEnumerable<DeviceDTO>> GetAllDevicesAsync()

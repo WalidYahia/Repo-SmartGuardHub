@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.Users;
 using SmartGuardHub.Protocols;
+using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
 namespace SmartGuardHub.Features.DeviceManagement
 {
@@ -73,5 +75,42 @@ namespace SmartGuardHub.Features.DeviceManagement
         public string? FwVersion { get; set; }
 
         public string? RawResponse { get; set; }
+    }
+
+    public class ApiSwitchRequest
+    {
+        public string DeviceId { get; set; }
+        public SwitchOutlet SwitchNo { get; set; }
+    }
+    public class ApiCreateDeviceRequest
+    {
+        public DeviceType DeviceType { get; set; }
+        public string DeviceId { get; set; }
+        public SwitchOutlet SwitchNo { get; set; }
+        public string Name { get; set; }
+    }
+    
+    public class ApiRenameDeviceRequest
+    {
+        public string DeviceId { get; set; }
+        public SwitchOutlet SwitchNo { get; set; }
+        public string Name { get; set; }
+    }
+    public class ApiEnableInchingModeRequest
+    {
+        public string DeviceId { get; set; }
+        public SwitchOutlet SwitchNo { get; set; }
+        public int InchingTimeInMs { get; set; }
+    }
+    public class ApiDisableInchingModeRequest
+    {
+        public string DeviceId { get; set; }
+        public SwitchOutlet SwitchNo { get; set; }
+    }
+    public class UnitMqttPayload
+    {
+        public string UnitId { get; set; }
+
+        public object Value { get; set; }
     }
 }

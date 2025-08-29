@@ -27,5 +27,8 @@ namespace SmartGuardHub.Features.Logging
         Message1 = 3,
         LogsCleanupCycle = 4,
         LogsCleanupError = 4,
+        MissingConfig = 5,
+        LoadConfig = 6,
+        MqttNotConnected = 7,
     }
 }

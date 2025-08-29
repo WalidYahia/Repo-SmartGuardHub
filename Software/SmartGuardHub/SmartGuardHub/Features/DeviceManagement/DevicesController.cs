@@ -11,6 +11,7 @@ using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
+using SmartGuardHub.Protocols.MQTT;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SmartGuardHub.Features.DeviceManagement
@@ -23,31 +24,39 @@ namespace SmartGuardHub.Features.DeviceManagement
         private readonly DeviceService _deviceService;
         private readonly DeviceCommunicationManager _deviceCommunicationManager;
         private readonly IEnumerable<ISystemDevice> _systemDevices;
+        private readonly IMqttService _mqttService;
 
-        public DevicesController(DeviceService deviceService, DeviceCommunicationManager deviceCommunicationManager, IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, LoggingService loggingService)
+        public DevicesController(DeviceService deviceService, DeviceCommunicationManager deviceCommunicationManager, IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, LoggingService loggingService, IMqttService mqttService)
         {
             _deviceService = deviceService;
             _loggingService = loggingService;
             _systemDevices = systemDevices;
             _deviceCommunicationManager = deviceCommunicationManager;
+
+            _mqttService = mqttService;
         }
 
 
         [HttpPost("createDevice")]
-        public async Task<IActionResult> CreateDevice(DeviceType deviceType, string deviceId, SwitchOutlet switchNo, string name)
+        public async Task<IActionResult> CreateDevice([FromBody] ApiCreateDeviceRequest apiCreateDeviceRequest)
         {
-            if (string.IsNullOrEmpty(deviceId) || string.IsNullOrEmpty(name))
+            if (apiCreateDeviceRequest == null)
+            {
+                return BadRequest("Request body is empty.");
+            }
+
+            if (string.IsNullOrEmpty(apiCreateDeviceRequest.DeviceId) || string.IsNullOrEmpty(apiCreateDeviceRequest.Name))
             {
                 return BadRequest("Device data is required.");
             }
 
-            DeviceDTO deviceCheck1 = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+            DeviceDTO deviceCheck1 = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiCreateDeviceRequest.DeviceId && d.SwitchNo == apiCreateDeviceRequest.SwitchNo);
             if (deviceCheck1 != null)
             {
                 return BadRequest("Device already registered.");
             }
 
-            DeviceDTO deviceCheck2 = SystemManager.Devices.FirstOrDefault(d => d.Name == name);
+            DeviceDTO deviceCheck2 = SystemManager.Units.FirstOrDefault(d => d.Name == apiCreateDeviceRequest.Name);
             if (deviceCheck2 != null)
             {
                 return BadRequest("Device with the same name is already registered.");
@@ -55,15 +64,15 @@ namespace SmartGuardHub.Features.DeviceManagement
 
             try
             {
-                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == deviceType);
+                var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == apiCreateDeviceRequest.DeviceType);
 
                 DeviceDTO deviceDTO = new DeviceDTO
                 {
-                    DeviceId = deviceId,
-                    SwitchNo = switchNo,
-                    Name = name,
-                    Type = deviceType,
-                    Url = systemDevice.BaseUrl + deviceId + ":" + systemDevice.PortNo,
+                    DeviceId = apiCreateDeviceRequest.DeviceId,
+                    SwitchNo = apiCreateDeviceRequest.SwitchNo,
+                    Name = apiCreateDeviceRequest.Name,
+                    Type = apiCreateDeviceRequest.DeviceType,
+                    Url = systemDevice.BaseUrl + apiCreateDeviceRequest.DeviceId + ":" + systemDevice.PortNo,
                     Protocol = systemDevice.ProtocolType,
                     IsOnline = false,
                     CreatedAt = SystemManager.TimeNow(),
@@ -97,14 +106,19 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("renameDevice")]
-        public async Task<IActionResult> RenameDevice(string deviceId, SwitchOutlet switchNo, string name)
+        public async Task<IActionResult> RenameDevice([FromBody] ApiRenameDeviceRequest apiRenameDeviceRequest)
         {
-            if (string.IsNullOrEmpty(name.Trim()))
+            if (apiRenameDeviceRequest == null)
+            {
+                return BadRequest("Request body is empty.");
+            }
+
+            if (string.IsNullOrEmpty(apiRenameDeviceRequest.Name.Trim()))
             {
                 return BadRequest("Device data is required.");
             }
 
-            DeviceDTO selectedDevice = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+            DeviceDTO selectedDevice = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiRenameDeviceRequest.DeviceId && d.SwitchNo == apiRenameDeviceRequest.SwitchNo);
             if (selectedDevice == null)
             {
                 return BadRequest("This device is not registered");
@@ -112,7 +126,7 @@ namespace SmartGuardHub.Features.DeviceManagement
 
             try
             {
-                selectedDevice.Name = name;
+                selectedDevice.Name = apiRenameDeviceRequest.Name;
 
                 var createdDevice = await _deviceService.UpdateDeviceAsync(selectedDevice);
 
@@ -147,7 +161,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             {
                 await _deviceService.RefreshDevices();
 
-                return Ok(SystemManager.Devices);
+                return Ok(SystemManager.Units);
             }
             catch (Exception ex)
             {
@@ -165,33 +179,40 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("on")]
-        public async Task<IActionResult> On(string deviceId, SwitchOutlet switchNo)
+        public async Task<IActionResult> On([FromBody] ApiSwitchRequest apiSwitchRequest)
         {
             try
             {
-                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+                if (apiSwitchRequest == null)
+                {
+                    return BadRequest("Request body is empty.");
+                }
+
+                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiSwitchRequest.DeviceId && d.SwitchNo == apiSwitchRequest.SwitchNo);
 
                 if (device != null)
                 {
                     var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
-                    var command = systemDevice.GetOnCommand(deviceId, switchNo);
+                    var command = systemDevice.GetOnCommand(apiSwitchRequest.DeviceId, apiSwitchRequest.SwitchNo);
 
                     string jsonString = JsonConvert.SerializeObject(command);
 
                     var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/switches", jsonString);
 
+                    await MqttPublishUserAction(result, new UnitMqttPayload {UnitId = device.Id.ToString(), Value = SwitchOutletStatus.On });
+
                     return Ok(result);
                 }
                 else
                 {
-                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {deviceId}-{(int)switchNo} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {apiSwitchRequest.DeviceId}-{(int)apiSwitchRequest.SwitchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
-                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while turning on the device {deviceId}-{(int)switchNo}", ex);
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while turning on the device {apiSwitchRequest.DeviceId}-{(int)apiSwitchRequest.SwitchNo}", ex);
 
                 var problemDetails = new ProblemDetails
                 {
@@ -205,33 +226,40 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("off")]
-        public async Task<IActionResult> Off(string deviceId, SwitchOutlet switchNo)
+        public async Task<IActionResult> Off([FromBody] ApiSwitchRequest apiSwitchRequest)
         {
             try
             {
-                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+                if (apiSwitchRequest == null)
+                {
+                    return BadRequest("Request body is empty.");
+                }
+
+                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiSwitchRequest.DeviceId && d.SwitchNo == apiSwitchRequest.SwitchNo);
 
                 if (device != null)
                 {
                     var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
-                    var command = systemDevice.GetOffCommand(deviceId, switchNo);
+                    var command = systemDevice.GetOffCommand(apiSwitchRequest.DeviceId, apiSwitchRequest.SwitchNo);
 
                     string jsonString = JsonConvert.SerializeObject(command);
 
                     var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/switches", jsonString);
 
+                    await MqttPublishUserAction(result, new UnitMqttPayload { UnitId = device.Id.ToString(), Value = SwitchOutletStatus.Off });
+
                     return Ok(result);
                 }
                 else
                 {
-                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"Off - Device with ID {deviceId}-{(int)switchNo} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"Off - Device with ID {apiSwitchRequest.DeviceId}-{(int)apiSwitchRequest.SwitchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
-                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while turning off the device {deviceId}-{(int)switchNo}", ex);
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while turning off the device {apiSwitchRequest.DeviceId}-{(int)apiSwitchRequest.SwitchNo}", ex);
 
                 var problemDetails = new ProblemDetails
                 {
@@ -249,7 +277,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         {
             try
             {
-                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId);
+                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == deviceId);
 
                 var result = await GetInfoResponse(device);
 
@@ -278,11 +306,16 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("enableInchingMode")]
-        public async Task<IActionResult> EnableInchingMode(string deviceId, SwitchOutlet switchNo, int inchingTimeInMs)
+        public async Task<IActionResult> EnableInchingMode([FromBody] ApiEnableInchingModeRequest apiEnableInchingModeRequest)
         {
             try
             {
-                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+                if (apiEnableInchingModeRequest == null)
+                {
+                    return BadRequest("Request body is empty.");
+                }
+
+                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiEnableInchingModeRequest.DeviceId && d.SwitchNo == apiEnableInchingModeRequest.SwitchNo);
 
                 if (device != null)
                 {
@@ -290,7 +323,7 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                     DeviceResponse infoResponse = await GetInfoResponse(device);
 
-                    var inchingCommand = systemDevice.GetOnInchingCommand(device.DeviceId, device.SwitchNo, inchingTimeInMs, (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
+                    var inchingCommand = systemDevice.GetOnInchingCommand(device.DeviceId, device.SwitchNo, apiEnableInchingModeRequest.InchingTimeInMs, (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
 
                     string jsonString = JsonConvert.SerializeObject(inchingCommand);
 
@@ -300,14 +333,14 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOn - Device with ID {deviceId}-{(int)switchNo} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOn - Device with ID {apiEnableInchingModeRequest.DeviceId}-{(int)apiEnableInchingModeRequest.SwitchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
-                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOn Device with ID {deviceId}-{(int)switchNo}", ex);
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOn Device with ID {apiEnableInchingModeRequest.DeviceId}-{(int)apiEnableInchingModeRequest.SwitchNo}", ex);
 
                 var problemDetails = new ProblemDetails
                 {
@@ -321,12 +354,16 @@ namespace SmartGuardHub.Features.DeviceManagement
         }
 
         [HttpPost("disableInchingMode")]
-        public async Task<IActionResult> DisableInchingMode(string deviceId, SwitchOutlet switchNo)
+        public async Task<IActionResult> DisableInchingMode([FromBody] ApiDisableInchingModeRequest apiDisableInchingModeRequest)
         {
             try
             {
+                if (apiDisableInchingModeRequest == null)
+                {
+                    return BadRequest("Request body is empty.");
+                }
 
-                DeviceDTO device = SystemManager.Devices.FirstOrDefault(d => d.DeviceId == deviceId && d.SwitchNo == switchNo);
+                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiDisableInchingModeRequest.DeviceId && d.SwitchNo == apiDisableInchingModeRequest.SwitchNo);
 
                 if (device != null)
                 {
@@ -344,14 +381,14 @@ namespace SmartGuardHub.Features.DeviceManagement
                 }
                 else
                 {
-                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOff - Device with Device with ID {deviceId}-{(int)switchNo} not found.");
+                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOff - Device with Device with ID {apiDisableInchingModeRequest.DeviceId}-{(int)apiDisableInchingModeRequest.SwitchNo} not found.");
 
                     return Ok(new DeviceResponse { State = DeviceResponseState.NotFound });
                 }
             }
             catch (Exception ex)
             {
-                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOff Device with ID {deviceId}-{(int)switchNo}", ex);
+                await _loggingService.LogErrorAsync(LogMessageKey.DevicesController, $"An error occurred while inchingOff Device with ID {apiDisableInchingModeRequest.DeviceId}-{(int)apiDisableInchingModeRequest.SwitchNo}", ex);
                 
                 var problemDetails = new ProblemDetails
                 {
@@ -363,7 +400,6 @@ namespace SmartGuardHub.Features.DeviceManagement
                 return new ObjectResult(problemDetails);
             }
         }
-
 
         private async Task<DeviceResponse> GetInfoResponse(DeviceDTO device)
         {
@@ -379,5 +415,17 @@ namespace SmartGuardHub.Features.DeviceManagement
                 return null;
             }
         }
+
+        private async Task MqttPublishUserAction(DeviceResponse deviceResult, UnitMqttPayload mqttPayload)
+        {
+            if (deviceResult != null && deviceResult.State == DeviceResponseState.OK)
+                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.ActionTopic_Hub), mqttPayload, retainFlag: false);
+        }
+    }
+
+    public class PublishRequest
+    {
+        public string Topic { get; set; } = string.Empty;
+        public object Message { get; set; } = new();
     }
 }

@@ -1,10 +1,12 @@
 using System.Diagnostics.Metrics;
 using Microsoft.EntityFrameworkCore;
+using SmartGuardHub.Configuration;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
+using SmartGuardHub.Protocols.MQTT;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +33,8 @@ builder.Services.AddScoped<DeviceCommunicationManager>();
 
 builder.Services.AddHostedService<LogCleanupService>();
 
+builder.Services.AddSingleton<ConfigurationService>();
+
 
 // HTTP Client for REST protocol
 builder.Services.AddHttpClient<RestProtocol>(client =>
@@ -45,6 +49,8 @@ builder.Services.AddScoped<ISystemDevice, SonOffMiniR>();
 builder.Services.AddScoped<IAsyncInitializer, DeviceService>();
 
 builder.Services.AddScoped<ISystemLogRepository, SystemLogRepository>();
+
+builder.Services.AddMqttService(); // Add this line
 
 // Logging
 builder.Services.AddLogging(logging =>
@@ -84,6 +90,10 @@ using (var scope = app.Services.CreateScope())
     var initializer = scope.ServiceProvider.GetRequiredService<IAsyncInitializer>();
     await initializer.InitializeAsync();
 }
+
+// Start MQTT service
+var mqttService = app.Services.GetRequiredService<IMqttService>();
+await mqttService.StartAsync();
 
 app.UseHttpsRedirection();
 

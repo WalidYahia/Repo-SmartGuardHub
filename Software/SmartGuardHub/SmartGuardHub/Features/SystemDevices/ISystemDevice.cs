@@ -37,4 +37,10 @@ namespace SmartGuardHub.Features.SystemDevices
         Third = 2,
         Fourth = 3,
     }
+
+    public enum SwitchOutletStatus
+    {
+        Off = 0,
+        On = 1,
+    }
 }
