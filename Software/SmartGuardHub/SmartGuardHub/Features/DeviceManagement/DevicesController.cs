@@ -50,13 +50,13 @@ namespace SmartGuardHub.Features.DeviceManagement
                 return BadRequest("Device data is required.");
             }
 
-            DeviceDTO deviceCheck1 = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiCreateDeviceRequest.DeviceId && d.SwitchNo == apiCreateDeviceRequest.SwitchNo);
+            DeviceDTO deviceCheck1 = SystemManager.InstalledDevices.FirstOrDefault(d => d.DeviceId == apiCreateDeviceRequest.DeviceId && d.SwitchNo == apiCreateDeviceRequest.SwitchNo);
             if (deviceCheck1 != null)
             {
                 return BadRequest("Device already registered.");
             }
 
-            DeviceDTO deviceCheck2 = SystemManager.Units.FirstOrDefault(d => d.Name == apiCreateDeviceRequest.Name);
+            DeviceDTO deviceCheck2 = SystemManager.InstalledDevices.FirstOrDefault(d => d.Name == apiCreateDeviceRequest.Name);
             if (deviceCheck2 != null)
             {
                 return BadRequest("Device with the same name is already registered.");
@@ -118,7 +118,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                 return BadRequest("Device data is required.");
             }
 
-            DeviceDTO selectedDevice = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiRenameDeviceRequest.DeviceId && d.SwitchNo == apiRenameDeviceRequest.SwitchNo);
+            DeviceDTO selectedDevice = SystemManager.InstalledDevices.FirstOrDefault(d => d.DeviceId == apiRenameDeviceRequest.DeviceId && d.SwitchNo == apiRenameDeviceRequest.SwitchNo);
             if (selectedDevice == null)
             {
                 return BadRequest("This device is not registered");
@@ -161,7 +161,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             {
                 await _deviceService.RefreshDevices();
 
-                return Ok(SystemManager.Units);
+                return Ok(SystemManager.InstalledDevices);
             }
             catch (Exception ex)
             {
@@ -188,7 +188,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                     return BadRequest("Request body is empty.");
                 }
 
-                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiSwitchRequest.DeviceId && d.SwitchNo == apiSwitchRequest.SwitchNo);
+                DeviceDTO device = SystemManager.InstalledDevices.FirstOrDefault(d => d.DeviceId == apiSwitchRequest.DeviceId && d.SwitchNo == apiSwitchRequest.SwitchNo);
 
                 if (device != null)
                 {
@@ -199,7 +199,7 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                     var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/switches", jsonString);
 
-                    await MqttPublishUserAction(result, new UnitMqttPayload {UnitId = device.Id.ToString(), Value = SwitchOutletStatus.On });
+                    MqttPublishUserAction(device, result, new UnitMqttPayload {UnitId = device.Id.ToString(), Value = SwitchOutletStatus.On });
 
                     return Ok(result);
                 }
@@ -235,7 +235,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                     return BadRequest("Request body is empty.");
                 }
 
-                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiSwitchRequest.DeviceId && d.SwitchNo == apiSwitchRequest.SwitchNo);
+                DeviceDTO device = SystemManager.InstalledDevices.FirstOrDefault(d => d.DeviceId == apiSwitchRequest.DeviceId && d.SwitchNo == apiSwitchRequest.SwitchNo);
 
                 if (device != null)
                 {
@@ -246,7 +246,7 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                     var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/switches", jsonString);
 
-                    await MqttPublishUserAction(result, new UnitMqttPayload { UnitId = device.Id.ToString(), Value = SwitchOutletStatus.Off });
+                    MqttPublishUserAction(device, result, new UnitMqttPayload { UnitId = device.Id.ToString(), Value = SwitchOutletStatus.Off });
 
                     return Ok(result);
                 }
@@ -277,7 +277,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         {
             try
             {
-                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == deviceId);
+                DeviceDTO device = SystemManager.InstalledDevices.FirstOrDefault(d => d.DeviceId == deviceId);
 
                 var result = await GetInfoResponse(device);
 
@@ -315,7 +315,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                     return BadRequest("Request body is empty.");
                 }
 
-                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiEnableInchingModeRequest.DeviceId && d.SwitchNo == apiEnableInchingModeRequest.SwitchNo);
+                DeviceDTO device = SystemManager.InstalledDevices.FirstOrDefault(d => d.DeviceId == apiEnableInchingModeRequest.DeviceId && d.SwitchNo == apiEnableInchingModeRequest.SwitchNo);
 
                 if (device != null)
                 {
@@ -328,6 +328,14 @@ namespace SmartGuardHub.Features.DeviceManagement
                     string jsonString = JsonConvert.SerializeObject(inchingCommand);
 
                     var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/pulses", jsonString);
+
+                    if(result.State == DeviceResponseState.OK)
+                    {
+                        device.IsInInchingMode = true;
+                        device.InchingModeWidthInMs = apiEnableInchingModeRequest.InchingTimeInMs;
+                        await _deviceService.UpdateDeviceAsync(device);
+                        await _deviceService.RefreshDevices();
+                    }
 
                     return Ok(result);
                 }
@@ -363,7 +371,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                     return BadRequest("Request body is empty.");
                 }
 
-                DeviceDTO device = SystemManager.Units.FirstOrDefault(d => d.DeviceId == apiDisableInchingModeRequest.DeviceId && d.SwitchNo == apiDisableInchingModeRequest.SwitchNo);
+                DeviceDTO device = SystemManager.InstalledDevices.FirstOrDefault(d => d.DeviceId == apiDisableInchingModeRequest.DeviceId && d.SwitchNo == apiDisableInchingModeRequest.SwitchNo);
 
                 if (device != null)
                 {
@@ -376,6 +384,14 @@ namespace SmartGuardHub.Features.DeviceManagement
                     string jsonString = JsonConvert.SerializeObject(inchingCommand);
 
                     var result = await _deviceCommunicationManager.SendCommandAsync(device, device.Url + "/zeroconf/pulses", jsonString);
+
+                    if(result.State == DeviceResponseState.OK)
+                    {
+                        device.IsInInchingMode = false;
+                        device.InchingModeWidthInMs = 0;
+                        await _deviceService.UpdateDeviceAsync(device);
+                        await _deviceService.RefreshDevices();
+                    }
 
                     return Ok(result);
                 }
@@ -416,10 +432,10 @@ namespace SmartGuardHub.Features.DeviceManagement
             }
         }
 
-        private async Task MqttPublishUserAction(DeviceResponse deviceResult, UnitMqttPayload mqttPayload)
+        private async Task MqttPublishUserAction(DeviceDTO device, DeviceResponse deviceResult, UnitMqttPayload mqttPayload)
         {
             if (deviceResult != null && deviceResult.State == DeviceResponseState.OK)
-                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.ActionTopic_Hub), mqttPayload, retainFlag: false);
+                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{device.Id}", mqttPayload, retainFlag: true);
         }
     }
 

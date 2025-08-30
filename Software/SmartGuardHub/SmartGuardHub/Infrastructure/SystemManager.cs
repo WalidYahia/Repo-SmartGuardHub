@@ -8,7 +8,7 @@ namespace SmartGuardHub.Infrastructure
         public static string DeviceId = "SmartGuard-" + GetCpuSerial();
 
         //public List<DeviceDTO> Devices = new List<DeviceDTO>();
-        public static ConcurrentBag<DeviceDTO> Units = new ConcurrentBag<DeviceDTO>();
+        public static ConcurrentBag<DeviceDTO> InstalledDevices = new ConcurrentBag<DeviceDTO>();
 
         public static DateTime TimeNow()
         {
@@ -48,7 +48,13 @@ namespace SmartGuardHub.Infrastructure
         /// <summary>
         /// Publish from Device, Subscribe from Mobile
         /// </summary>
-        public const string ActionTopic_Hub = "Action_Hub";
+        public const string InstalledDevices = "InstalledDevices";
+
+
+        /// <summary>
+        /// Publish from Device, Subscribe from Mobile
+        /// </summary>
+        public const string DeviceDataTopic = "DeviceData";
 
         /// <summary>
         /// Publish from Mobile, Subscribe from Device

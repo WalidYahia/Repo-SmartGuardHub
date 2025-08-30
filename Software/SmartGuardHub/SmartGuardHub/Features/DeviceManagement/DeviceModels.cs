@@ -35,6 +35,10 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         public DateTime LastSeen { get; set; }
 
+        public bool IsInInchingMode { get; set; }
+
+        public int InchingModeWidthInMs { get; set; }
+
         public string? FwVersion { get; set; }
 
         // Device-specific properties as JSON
@@ -71,6 +75,10 @@ namespace SmartGuardHub.Features.DeviceManagement
         public DateTime CreatedAt { get; set; }
 
         public DateTime LastSeen { get; set; }
+
+        public bool IsInInchingMode { get; set; }
+
+        public int InchingModeWidthInMs { get; set; }
 
         public string? FwVersion { get; set; }
 

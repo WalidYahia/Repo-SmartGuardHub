@@ -1,6 +1,8 @@
-﻿using SmartGuardHub.Features.SystemDevices;
+﻿using System.Text.Json;
+using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
+using SmartGuardHub.Protocols.MQTT;
 
 namespace SmartGuardHub.Features.DeviceManagement
 {
@@ -8,11 +10,13 @@ namespace SmartGuardHub.Features.DeviceManagement
     {
         private readonly IDeviceRepository _deviceRepository;
         private readonly ILogger<DeviceService> _logger;
+        private readonly IMqttService _mqttService;
 
-        public DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceService> logger)
+        public DeviceService(IDeviceRepository deviceRepository, ILogger<DeviceService> logger, IMqttService mqttService)
         {
             _deviceRepository = deviceRepository;
             _logger = logger;
+            _mqttService = mqttService;
         }
 
         public async Task InitializeAsync()
@@ -22,9 +26,11 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         public async Task RefreshDevices()
         {
-            SystemManager.Units = new (await GetAllDevicesAsync());
+            SystemManager.InstalledDevices = new (await GetAllDevicesAsync());
 
-            _logger.LogInformation("Refreshed devices. Total devices: {Count}", SystemManager.Units.Count);
+            _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.InstalledDevices), SystemManager.InstalledDevices, true);
+
+            _logger.LogInformation("Refreshed devices. Total devices: {Count}", SystemManager.InstalledDevices.Count);
         }
 
         public async Task<IEnumerable<DeviceDTO>> GetAllDevicesAsync()
@@ -112,6 +118,8 @@ namespace SmartGuardHub.Features.DeviceManagement
                 FwVersion = device.FwVersion,
                 CreatedAt = device.CreatedAt,
                 RawResponse = device.RawResponse,
+                IsInInchingMode = device.IsInInchingMode,
+                InchingModeWidthInMs = device.InchingModeWidthInMs
             };
         }
         private static Device MapToDevice(DeviceDTO deviceDto)
@@ -130,6 +138,8 @@ namespace SmartGuardHub.Features.DeviceManagement
                 FwVersion = deviceDto.FwVersion,
                 CreatedAt = deviceDto.CreatedAt,
                 RawResponse = deviceDto.RawResponse,
+                InchingModeWidthInMs = deviceDto.InchingModeWidthInMs,
+                IsInInchingMode = deviceDto.IsInInchingMode,
             };
         }
     }

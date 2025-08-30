@@ -84,16 +84,16 @@ using (var scope = app.Services.CreateScope())
     context.Database.Migrate(); // Apply migrations
 }
 
+// Start MQTT service
+var mqttService = app.Services.GetRequiredService<IMqttService>();
+await mqttService.StartAsync();
+
 // Call async initialization before app starts handling requests
 using (var scope = app.Services.CreateScope())
 {
     var initializer = scope.ServiceProvider.GetRequiredService<IAsyncInitializer>();
     await initializer.InitializeAsync();
 }
-
-// Start MQTT service
-var mqttService = app.Services.GetRequiredService<IMqttService>();
-await mqttService.StartAsync();
 
 app.UseHttpsRedirection();
 
