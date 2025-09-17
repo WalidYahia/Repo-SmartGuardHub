@@ -46,19 +46,39 @@ namespace SmartGuardHub.Features.DeviceManagement
             {
                 var result = await _userCommandHandler.HandleUserCommand(jsonCommand);
 
-                if (result.State == DeviceResponseState.DeviceAlreadyRegistered
-                    || result.State == DeviceResponseState.DeviceNameAlreadyRegistered
-                    || result.State == DeviceResponseState.DeviceDataIsRequired)
-                    return BadRequest(result);
-
-                else if (result.State == DeviceResponseState.Conflict)
-                    return Conflict(result);
-
-                else
+                switch (result.State)
                 {
-                    return Ok(result);
+                    case DeviceResponseState.NotFound:
+                    case DeviceResponseState.Timeout:
+                    case DeviceResponseState.Error:
+                    case DeviceResponseState.BadRequest:
+                    case DeviceResponseState.DeviceDataIsRequired:
+                    case DeviceResponseState.DeviceAlreadyRegistered:
+                    case DeviceResponseState.DeviceNameAlreadyRegistered:
+                    case DeviceResponseState.InchingIntervalValidationError:
+                    case DeviceResponseState.EmptyPayload:
+                    case DeviceResponseState.NoContent:
+                        return BadRequest(result);
 
-                    //MqttPublishUserAction(device, result, new UnitMqttPayload { UnitId = device.Id.ToString(), Value = SwitchOutletStatus.On });
+                    case DeviceResponseState.Conflict:
+                        return Conflict(result);
+
+                    case DeviceResponseState.OK:
+                        switch (jsonCommand.jsonCommandType)
+                        {
+                            case JsonCommandType.TurnOn:
+                                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.InstalledSensorId.ToString(), Value = SwitchOutletStatus.On }, retainFlag: true);
+                                break;
+
+                            case JsonCommandType.TurnOff:
+                                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.InstalledSensorId.ToString(), Value = SwitchOutletStatus.Off }, retainFlag: true);
+                                break;
+                        }
+
+                        return Ok(result);
+
+                    default:
+                        return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
                 }
             }
             catch (Exception ex)
@@ -74,12 +94,6 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                 return new ObjectResult(problemDetails);
             }
-        }
-
-        private async Task MqttPublishUserAction(SensorDTO device, GeneralResponse deviceResult, UnitMqttPayload mqttPayload)
-        {
-            if (deviceResult != null && deviceResult.State == DeviceResponseState.OK)
-                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{device.Id}", mqttPayload, retainFlag: true);
         }
     }
 

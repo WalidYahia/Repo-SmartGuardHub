@@ -86,7 +86,7 @@ namespace SmartGuardHub.Features.UserCommands
 
     public class UnitMqttPayload
     {
-        public string UnitId { get; set; }
+        public string SensorId { get; set; }
 
         public object Value { get; set; }
     }
