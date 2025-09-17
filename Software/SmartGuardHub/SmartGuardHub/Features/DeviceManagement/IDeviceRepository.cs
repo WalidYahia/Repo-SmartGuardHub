@@ -12,7 +12,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         Task<Device> CreateAsync(Device device);
         Task<Device> UpdateAsync(Device device);
         Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<Device>> GetByProtocolAsync(DeviceProtocolType protocol);
+        Task<IEnumerable<Device>> GetByProtocolAsync(UnitProtocolType protocol);
         Task<IEnumerable<Device>> GetOnlineDevicesAsync();
         Task UpdateLastSeenAsync(int id);
     }

@@ -55,7 +55,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             return true;
         }
 
-        public async Task<IEnumerable<Device>> GetByProtocolAsync(DeviceProtocolType protocol)
+        public async Task<IEnumerable<Device>> GetByProtocolAsync(UnitProtocolType protocol)
         {
             return await _context.Devices
                 .Where(d => d.Protocol == (int)protocol)

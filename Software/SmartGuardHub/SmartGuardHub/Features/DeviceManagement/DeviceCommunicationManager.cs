@@ -1,26 +1,26 @@
-﻿using SmartGuardHub.Features.SystemDevices;
+﻿using System.Text.Json;
+using SmartGuardHub.Features.Logging;
+using SmartGuardHub.Features.SystemDevices;
+using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
 
 namespace SmartGuardHub.Features.DeviceManagement
 {
     public class DeviceCommunicationManager
     {
-        private readonly IEnumerable<ISystemDevice> _systemDevices;
+        private readonly IEnumerable<ISystemUnit> _systemUnits;
         private readonly IEnumerable<IDeviceProtocol> _protocols;
-        private readonly ILogger<DeviceCommunicationManager> _logger;
-
-        public DeviceCommunicationManager(IEnumerable<ISystemDevice> systemDevices, IEnumerable<IDeviceProtocol> protocols, ILogger<DeviceCommunicationManager> logger)
+        public DeviceCommunicationManager(IEnumerable<ISystemUnit> systemUnits, IEnumerable<IDeviceProtocol> protocols)
         {
-            _systemDevices = systemDevices;
+            _systemUnits = systemUnits;
             _protocols = protocols;
-            _logger = logger;
         }
 
-        public async Task<DeviceResponse> SendCommandAsync(DeviceDTO device, string destination, string command, object? parameters = null)
+        public async Task<GeneralResponse> SendCommandAsync(SensorDTO device, string destination, string command, object? parameters = null)
         {
             var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
 
-            var systemDevice = _systemDevices.FirstOrDefault(d => d.DeviceType == device.Type);
+            var systemDevice = _systemUnits.FirstOrDefault(d => d.DeviceType == device.Type);
 
             var result = await protocol.SendCommandAsync(destination, command, parameters);
 

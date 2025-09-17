@@ -8,7 +8,7 @@ namespace SmartGuardHub.Infrastructure
         public static string DeviceId = "SmartGuard-" + GetCpuSerial();
 
         //public List<DeviceDTO> Devices = new List<DeviceDTO>();
-        public static ConcurrentBag<DeviceDTO> InstalledDevices = new ConcurrentBag<DeviceDTO>();
+        public static ConcurrentBag<SensorDTO> InstalledSensors = new ConcurrentBag<SensorDTO>();
 
         public static DateTime TimeNow()
         {

@@ -1,0 +1,93 @@
+﻿using Newtonsoft.Json;
+using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Features.Logging;
+using SmartGuardHub.Features.SystemDevices;
+using SmartGuardHub.Infrastructure;
+using static SmartGuardHub.Infrastructure.Enums;
+
+namespace SmartGuardHub.Features.UserCommands
+{
+    public abstract class UserCommand
+    {
+        protected readonly IEnumerable<ISystemUnit> _systemUnits;
+        protected readonly LoggingService _loggingService;
+        protected readonly DeviceService _deviceService;
+
+        public JsonCommandType jsonCommandType { get; set; }
+        protected UserCommand(IEnumerable<ISystemUnit> systemUnits, LoggingService loggingService, DeviceService deviceService)
+        {
+            _systemUnits = systemUnits;
+            _loggingService = loggingService;
+            _deviceService = deviceService;
+        }
+
+        protected abstract Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand);
+
+        public async Task<GeneralResponse> ExecuteCommandAsync(JsonCommand jsonCommand) 
+        {
+            if (await RequestIsValid(jsonCommand))
+            {
+                return await ExecuteAsync(jsonCommand);
+            }
+            else
+            {
+                return new GeneralResponse
+                {
+                    State = DeviceResponseState.DeviceDataIsRequired,
+                    DevicePayload = "Device data is required"
+                };
+            }
+        }
+
+        protected virtual async Task<bool> RequestIsValid(JsonCommand jsonCommand)
+        {
+            return jsonCommand.CommandPayload == null ? false : true;
+        }
+
+        protected async Task<SensorDTO> LoadInstalledSensor(int installedDeviceId)
+        {
+            var device = SystemManager.InstalledSensors.FirstOrDefault(d => d.Id == installedDeviceId);
+
+            return device;
+        }
+        protected async Task<ISystemUnit> LoadSystemUnit(UnitType deviceType)
+        {
+            var systemDevice = _systemUnits.FirstOrDefault(d => d.DeviceType == deviceType);
+
+            return systemDevice;
+        }
+        protected async Task<GeneralResponse> GetInfoResponse(string installedDeviceUrl, ISystemUnit systemDevice, JsonCommandPayload jsonCommandPayload)
+        {
+            var command = systemDevice.GetInfoCommand(jsonCommandPayload.UnitId);
+            string jsonString = JsonConvert.SerializeObject(command);
+            return await systemDevice.SendCommandAsync(installedDeviceUrl + systemDevice.InfoPath, jsonString);
+        }
+    }
+
+
+    public class JsonCommand
+    {
+        public int InstalledSensorId { get; set; }
+
+        public JsonCommandType jsonCommandType { get; set; }
+
+        public JsonCommandPayload? CommandPayload { get; set; }
+    }
+
+    public class JsonCommandPayload
+    {
+        public string? UnitId { get; set; }
+        public SwitchOutlet SwitchNo { get; set; }
+
+        public UnitType DeviceType { get; set; }
+        public string? Name { get; set; }
+        public int InchingTimeInMs { get; set; }
+    }
+
+    public class UnitMqttPayload
+    {
+        public string UnitId { get; set; }
+
+        public object Value { get; set; }
+    }
+}

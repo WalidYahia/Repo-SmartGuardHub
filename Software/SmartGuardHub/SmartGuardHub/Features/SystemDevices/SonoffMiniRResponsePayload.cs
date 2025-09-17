@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using SmartGuardHub.Features.DeviceManagement;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.SystemDevices
 {

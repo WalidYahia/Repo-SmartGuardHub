@@ -1,14 +1,13 @@
 ﻿using SmartGuardHub.Features.DeviceManagement;
-using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 
 namespace SmartGuardHub.Protocols
 {
     public interface IDeviceProtocol
     {
-        DeviceProtocolType ProtocolType { get; }
+        UnitProtocolType ProtocolType { get; }
 
-        Task<DeviceResponse> SendCommandAsync(string destination , string command, object? parameters = null);
+        Task<GeneralResponse> SendCommandAsync(string destination , string command, object? parameters = null);
 
         //Task<bool> DiscoverDevicesAsync();
 
@@ -26,7 +25,7 @@ namespace SmartGuardHub.Protocols
         public DateTime Timestamp { get; set; } = SystemManager.TimeNow();
     }
 
-    public enum DeviceProtocolType
+    public enum UnitProtocolType
     {
         Zigbee = 1,
         Rest = 2,

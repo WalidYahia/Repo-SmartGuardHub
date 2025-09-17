@@ -3,8 +3,8 @@ using System.Text;
 using SmartGuardHub.Features.DeviceManagement;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
-using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.Logging;
+using SmartGuardHub.Infrastructure;
 
 namespace SmartGuardHub.Protocols
 {
@@ -12,7 +12,7 @@ namespace SmartGuardHub.Protocols
     {
         private readonly LoggingService _loggingService;
         private readonly HttpClient _httpClient;
-        public DeviceProtocolType ProtocolType => DeviceProtocolType.Rest;
+        public UnitProtocolType ProtocolType => UnitProtocolType.Rest;
 
         public RestProtocol(HttpClient httpClient, LoggingService loggingService)
         {
@@ -20,7 +20,7 @@ namespace SmartGuardHub.Protocols
             _loggingService = loggingService;
         }
 
-        public async Task<DeviceResponse> SendCommandAsync(string destination, string command, object? parameters = null)
+        public async Task<GeneralResponse> SendCommandAsync(string destination, string command, object? parameters = null)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace SmartGuardHub.Protocols
                 {
                     var responseContent = await response.Content.ReadAsStringAsync();
 
-                    return new DeviceResponse
+                    return new GeneralResponse
                     {
                         State = DeviceResponseState.OK,
                         DevicePayload = responseContent
@@ -44,7 +44,7 @@ namespace SmartGuardHub.Protocols
                 }
                 else
                 {                    
-                    DeviceResponse deviceResponse = new DeviceResponse();
+                    GeneralResponse deviceResponse = new GeneralResponse();
 
                     switch (response.StatusCode)
                     {
@@ -72,7 +72,7 @@ namespace SmartGuardHub.Protocols
             {
                 await _loggingService.LogErrorAsync(LogMessageKey.RestProtocol, $"Failed to send REST command {command} to device {destination}", ex);
 
-                return new DeviceResponse();
+                return new GeneralResponse();
             }
         }
 

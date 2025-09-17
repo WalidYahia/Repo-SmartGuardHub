@@ -30,5 +30,6 @@ namespace SmartGuardHub.Features.Logging
         MissingConfig = 5,
         LoadConfig = 6,
         MqttNotConnected = 7,
+        UserCommandHandler = 8,
     }
 }

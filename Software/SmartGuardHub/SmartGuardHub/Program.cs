@@ -4,6 +4,7 @@ using SmartGuardHub.Configuration;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
+using SmartGuardHub.Features.UserCommands;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
 using SmartGuardHub.Protocols.MQTT;
@@ -42,10 +43,25 @@ builder.Services.AddHttpClient<RestProtocol>(client =>
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 
+
+// user command handler
+builder.Services.AddScoped<UserCommandHandler>();
+
+// user commands
+builder.Services.AddScoped<UserCommand, TurnOffCommand>();
+builder.Services.AddScoped<UserCommand, TurnOnCommand>();
+builder.Services.AddScoped<UserCommand, InchingOnCommand>();
+builder.Services.AddScoped<UserCommand, InchingOffCommand>();
+builder.Services.AddScoped<UserCommand, CreateDeviceCommand>();
+builder.Services.AddScoped<UserCommand, RenameDeviceCommand>();
+builder.Services.AddScoped<UserCommand, GetInfoCommand>();
+builder.Services.AddScoped<UserCommand, LoadAllUnitsCommand>();
+
+
 // Protocols
 builder.Services.AddScoped<IDeviceProtocol, RestProtocol>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
-builder.Services.AddScoped<ISystemDevice, SonOffMiniR>();
+builder.Services.AddScoped<ISystemUnit, SonOffMiniR>();
 builder.Services.AddScoped<IAsyncInitializer, DeviceService>();
 
 builder.Services.AddScoped<ISystemLogRepository, SystemLogRepository>();

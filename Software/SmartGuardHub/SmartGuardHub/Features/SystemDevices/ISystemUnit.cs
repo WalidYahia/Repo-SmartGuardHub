@@ -1,15 +1,23 @@
 ﻿using System.Net.Sockets;
+using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.SystemDevices
 {
-    public interface ISystemDevice
+    public interface ISystemUnit
     {
-        DeviceType DeviceType { get; }
-        DeviceProtocolType ProtocolType { get; }
+        UnitType DeviceType { get; }
+        UnitProtocolType ProtocolType { get; }
 
         string BaseUrl { get; }
         string PortNo { get; }
+        public string DataPath { get; }
+        public string InfoPath { get; }
+        public string InchingPath { get; }
+
+        public Task<GeneralResponse> SendCommandAsync(string destination, string command, object? parameters = null);
 
         public DeviceRequest GetOnCommand(string deviceId, SwitchOutlet switchNo);
         public DeviceRequest GetOffCommand(string deviceId, SwitchOutlet switchNo);
@@ -19,28 +27,8 @@ namespace SmartGuardHub.Features.SystemDevices
         public DeviceRequest GetOffInchingCommand(string deviceId, SwitchOutlet switchNo, List<SonoffMiniRPayloadDataPulse> devicePulses);
 
         public string GetDeviceUrl(string deviceId);
-        public DeviceProtocolType GetDeviceProtocol();
-        public DeviceResponse ParseResponse(DeviceResponse deviceResponse);
+        public UnitProtocolType GetDeviceProtocol();
+        public GeneralResponse ParseResponse(GeneralResponse deviceResponse);
 
-    }
-
-    public enum DeviceType
-    {
-        SonoffMiniR3 = 0,
-        SonoffMiniR4M = 1,
-    }
-
-    public enum SwitchOutlet
-    {
-        First = 0,
-        Second = 1,
-        Third = 2,
-        Fourth = 3,
-    }
-
-    public enum SwitchOutletStatus
-    {
-        Off = 0,
-        On = 1,
     }
 }

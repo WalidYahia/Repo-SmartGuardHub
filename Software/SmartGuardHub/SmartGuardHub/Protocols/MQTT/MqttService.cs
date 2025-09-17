@@ -199,6 +199,21 @@ namespace SmartGuardHub.Protocols.MQTT
             }
 
         }
+
+        private async Task HandleReceivedMessages(string topic, string payload)
+        {
+            string remoteAction = SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Publish);
+            string remoteUpdate = SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Publish);
+
+            if (topic.Contains(MqttTopics.RemoteActionTopic_Publish))
+            { 
+                
+            }
+            else if (topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
+            {
+
+            }
+        }
     }
 }
 

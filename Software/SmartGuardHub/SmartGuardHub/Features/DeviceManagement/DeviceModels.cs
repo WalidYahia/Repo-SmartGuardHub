@@ -7,6 +7,7 @@ using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.Users;
 using SmartGuardHub.Protocols;
 using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.DeviceManagement
 {
@@ -51,12 +52,12 @@ namespace SmartGuardHub.Features.DeviceManagement
 
 
     // DTOs for API 
-    public class DeviceDTO
+    public class SensorDTO
     {
         public int Id { get; set; }
 
         [Required]
-        public string DeviceId { get; set; } = string.Empty;
+        public string UnitId { get; set; } = string.Empty;
 
         [Required]
         public SwitchOutlet SwitchNo { get; set; }
@@ -66,9 +67,9 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         public string? Url { get; set; }
 
-        public DeviceType Type { get; set; }
+        public UnitType Type { get; set; }
 
-        public DeviceProtocolType Protocol { get; set; }
+        public UnitProtocolType Protocol { get; set; }
 
         public bool IsOnline { get; set; } = true;
 
@@ -83,42 +84,5 @@ namespace SmartGuardHub.Features.DeviceManagement
         public string? FwVersion { get; set; }
 
         public string? RawResponse { get; set; }
-    }
-
-    public class ApiSwitchRequest
-    {
-        public string DeviceId { get; set; }
-        public SwitchOutlet SwitchNo { get; set; }
-    }
-    public class ApiCreateDeviceRequest
-    {
-        public DeviceType DeviceType { get; set; }
-        public string DeviceId { get; set; }
-        public SwitchOutlet SwitchNo { get; set; }
-        public string Name { get; set; }
-    }
-    
-    public class ApiRenameDeviceRequest
-    {
-        public string DeviceId { get; set; }
-        public SwitchOutlet SwitchNo { get; set; }
-        public string Name { get; set; }
-    }
-    public class ApiEnableInchingModeRequest
-    {
-        public string DeviceId { get; set; }
-        public SwitchOutlet SwitchNo { get; set; }
-        public int InchingTimeInMs { get; set; }
-    }
-    public class ApiDisableInchingModeRequest
-    {
-        public string DeviceId { get; set; }
-        public SwitchOutlet SwitchNo { get; set; }
-    }
-    public class UnitMqttPayload
-    {
-        public string UnitId { get; set; }
-
-        public object Value { get; set; }
     }
 }

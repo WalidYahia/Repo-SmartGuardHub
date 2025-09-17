@@ -1,18 +1,28 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Sockets;
+using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.SystemDevices
 {
-    public class SonOffMiniR: ISystemDevice
+    public class SonOffMiniR: ISystemUnit
     {
-        public DeviceType DeviceType => DeviceType.SonoffMiniR3;
-        public DeviceProtocolType ProtocolType => DeviceProtocolType.Rest;
+        private readonly IEnumerable<IDeviceProtocol> _protocols;
+        public SonOffMiniR(IEnumerable<IDeviceProtocol> protocols)
+        {
+            _protocols = protocols;
+        }
+
+        public UnitType DeviceType => UnitType.SonoffMiniR3;
+        public UnitProtocolType ProtocolType => UnitProtocolType.Rest;
         public string BaseUrl => "http://eWeLink_";
         public string PortNo => "8081";
+        public string DataPath => "/zeroconf/switches";
+        public string InfoPath => "/zeroconf/info";
+        public string InchingPath => "/zeroconf/pulses";
 
-        // http://eWeLink_10016ca843:8081/zeroconf/switches
 
         public DeviceRequest GetOnCommand(string deviceId, SwitchOutlet switchNo)
         {
@@ -120,29 +130,43 @@ namespace SmartGuardHub.Features.SystemDevices
             return "http://eWeLink_" + deviceId + ":8081/zeroconf";
         }
 
-        public DeviceProtocolType GetDeviceProtocol()
+        public UnitProtocolType GetDeviceProtocol()
         {
-            return DeviceProtocolType.Rest;
+            return UnitProtocolType.Rest;
         }
 
-        public DeviceResponse ParseResponse(DeviceResponse deviceResponse)
+        public GeneralResponse ParseResponse(GeneralResponse deviceResponse)
         {
             var devicePayload = Newtonsoft.Json.JsonConvert.DeserializeObject<SonoffMiniRResponsePayload>(deviceResponse.DevicePayload);
 
             if (devicePayload.Error != 0)
             {
-                return new DeviceResponse
+                return new GeneralResponse
                 {
                     State = DeviceResponseState.BadRequest,
                     DevicePayload = devicePayload
                 };
             }
 
-            return new DeviceResponse
+            return new GeneralResponse
             {
                 State = deviceResponse.State,
                 DevicePayload = devicePayload
             };
+        }
+
+        public async Task<GeneralResponse> SendCommandAsync(string destination, string command, object? parameters = null)
+        {
+            var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == ProtocolType);
+
+            var result = await protocol.SendCommandAsync(destination, command, parameters);
+
+            if (result.State == DeviceResponseState.OK)
+            {
+                return ParseResponse(result);
+            }
+            else
+                return result;
         }
     }
 }
