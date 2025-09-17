@@ -3,6 +3,7 @@ using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.UserCommands
 {
@@ -27,6 +28,16 @@ namespace SmartGuardHub.Features.UserCommands
                 string jsonString = JsonConvert.SerializeObject(command);
 
                 GeneralResponse result = await systemDevice.SendCommandAsync(installedDevice.Url + systemDevice.DataPath, jsonString);
+
+                if (result.State == DeviceResponseState.OK)
+                {
+                    installedDevice.LatestValue = (int)SwitchOutletStatus.On;
+
+                    result.DevicePayload = installedDevice;
+
+                    _deviceService.UpdateDeviceAsync(installedDevice);
+                    _deviceService.RefreshDevices();
+                }
 
                 return result;
             }

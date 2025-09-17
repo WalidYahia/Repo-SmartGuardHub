@@ -8,7 +8,5 @@
         Task SubscribeAsync(string topic);
 
         Task ConnectAsync(int trialsCount);
-
-        event Func<string, string, Task>? MessageReceived;
     }
 }

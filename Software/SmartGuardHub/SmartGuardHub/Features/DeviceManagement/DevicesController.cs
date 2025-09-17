@@ -48,10 +48,6 @@ namespace SmartGuardHub.Features.DeviceManagement
 
                 switch (result.State)
                 {
-                    case DeviceResponseState.NotFound:
-                    case DeviceResponseState.Timeout:
-                    case DeviceResponseState.Error:
-                    case DeviceResponseState.BadRequest:
                     case DeviceResponseState.DeviceDataIsRequired:
                     case DeviceResponseState.DeviceAlreadyRegistered:
                     case DeviceResponseState.DeviceNameAlreadyRegistered:
@@ -63,22 +59,28 @@ namespace SmartGuardHub.Features.DeviceManagement
                     case DeviceResponseState.Conflict:
                         return Conflict(result);
 
-                    case DeviceResponseState.OK:
-                        switch (jsonCommand.jsonCommandType)
-                        {
-                            case JsonCommandType.TurnOn:
-                                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.InstalledSensorId.ToString(), Value = SwitchOutletStatus.On }, retainFlag: true);
-                                break;
+                    //case DeviceResponseState.OK:
+                    //case DeviceResponseState.NotFound:
+                    //case DeviceResponseState.Timeout:
+                    //case DeviceResponseState.BadRequest:
+                    //case DeviceResponseState.Error:
+                    default:
 
-                            case JsonCommandType.TurnOff:
-                                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.InstalledSensorId.ToString(), Value = SwitchOutletStatus.Off }, retainFlag: true);
-                                break;
+                        if (result.State == DeviceResponseState.OK)
+                        {
+                            switch (jsonCommand.jsonCommandType)
+                            {
+                                case JsonCommandType.TurnOn:
+                                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.InstalledSensorId.ToString(), Value = SwitchOutletStatus.On }, retainFlag: true);
+                                    break;
+
+                                case JsonCommandType.TurnOff:
+                                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.InstalledSensorId.ToString(), Value = SwitchOutletStatus.Off }, retainFlag: true);
+                                    break;
+                            }
                         }
 
                         return Ok(result);
-
-                    default:
-                        return StatusCode(StatusCodes.Status500InternalServerError, "An unexpected error occurred.");
                 }
             }
             catch (Exception ex)

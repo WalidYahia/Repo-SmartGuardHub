@@ -35,8 +35,10 @@ namespace SmartGuardHub.Features.UserCommands
                     installedDevice.IsInInchingMode = false;
                     installedDevice.InchingModeWidthInMs = 0;
 
-                    await _deviceService.UpdateDeviceAsync(installedDevice);
-                    await _deviceService.RefreshDevices();
+                    result.DevicePayload = installedDevice;
+
+                    _deviceService.UpdateDeviceAsync(installedDevice);
+                    _deviceService.RefreshDevices();
                 }
 
                 return result;

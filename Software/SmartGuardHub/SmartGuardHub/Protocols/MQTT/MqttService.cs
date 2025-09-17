@@ -13,8 +13,6 @@ namespace SmartGuardHub.Protocols.MQTT
 {
     public class MqttService : IMqttService
     {
-        public event Func<string, string, Task>? MessageReceived;
-
         private IMqttClient _mqttClient;
         private MqttClientOptions _mqttClientTlsOptions;
 
@@ -149,20 +147,6 @@ namespace SmartGuardHub.Protocols.MQTT
             }
         }
 
-        private async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs e)
-        {
-            var topic = e.ApplicationMessage.Topic;
-            var payload = e.ApplicationMessage.ConvertPayloadToString();
-
-            Console.WriteLine($"Received message on topic {topic}: {payload}");
-
-            // Trigger the event for other parts of your application
-            if (MessageReceived != null)
-            {
-                await MessageReceived.Invoke(topic, payload);
-            }
-        }
-
         private async Task OnConnected(MqttClientConnectedEventArgs e)
         {
             Console.WriteLine("MQTT client connected");
@@ -198,6 +182,16 @@ namespace SmartGuardHub.Protocols.MQTT
                     break;
             }
 
+        }
+
+        private async Task OnMessageReceived(MqttApplicationMessageReceivedEventArgs e)
+        {
+            var topic = e.ApplicationMessage.Topic;
+            var payload = e.ApplicationMessage.ConvertPayloadToString();
+
+            Console.WriteLine($"Received message on topic {topic}: {payload}");
+
+            // Trigger the event for other parts of your application
         }
 
         private async Task HandleReceivedMessages(string topic, string payload)
