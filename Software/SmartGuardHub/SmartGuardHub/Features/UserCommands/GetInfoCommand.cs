@@ -16,7 +16,7 @@ namespace SmartGuardHub.Features.UserCommands
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)
         {
-            var installedDevice = await LoadInstalledSensor(jsonCommand.InstalledSensorId);
+            var installedDevice = await LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
 
             if (installedDevice != null)
             {
@@ -28,7 +28,7 @@ namespace SmartGuardHub.Features.UserCommands
             }
             else
             {
-                await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {jsonCommand.InstalledSensorId} not found.");
+                await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {jsonCommand.CommandPayload.InstalledSensorId} not found.");
 
                 return new GeneralResponse
                 {
@@ -36,11 +36,6 @@ namespace SmartGuardHub.Features.UserCommands
                     DevicePayload = "Device not found"
                 };
             }
-        }
-
-        protected override async Task<bool> RequestIsValid(JsonCommand jsonCommand)
-        {
-            return true;
         }
     }
 }

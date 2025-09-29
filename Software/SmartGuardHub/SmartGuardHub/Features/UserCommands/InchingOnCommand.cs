@@ -25,7 +25,7 @@ namespace SmartGuardHub.Features.UserCommands
                 };
             }
 
-            var installedDevice = await LoadInstalledSensor(jsonCommand.InstalledSensorId);
+            var installedDevice = await LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
 
             if (installedDevice != null)
             {

@@ -8,5 +8,7 @@
         Task SubscribeAsync(string topic);
 
         Task ConnectAsync(int trialsCount);
+
+        public event Func<MqttMessageModel, Task> ProcessMessageReceived;
     }
 }

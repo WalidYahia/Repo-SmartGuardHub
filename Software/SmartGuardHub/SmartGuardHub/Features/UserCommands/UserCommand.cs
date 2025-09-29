@@ -67,9 +67,13 @@ namespace SmartGuardHub.Features.UserCommands
 
     public class JsonCommand
     {
-        public int InstalledSensorId { get; set; }
+        /// <summary>
+        /// A unique identifier for the request
+        /// For mobile app mqtt-subscribe (each mobile app process only recieved ack of its actions).
+        /// </summary>
+        public string? RequestId { get; set; }
 
-        public JsonCommandType jsonCommandType { get; set; }
+        public JsonCommandType JsonCommandType { get; set; }
 
         public JsonCommandPayload? CommandPayload { get; set; }
     }
@@ -78,6 +82,7 @@ namespace SmartGuardHub.Features.UserCommands
     {
         public string? UnitId { get; set; }
         public SwitchOutlet SwitchNo { get; set; }
+        public int InstalledSensorId { get; set; }
 
         public UnitType DeviceType { get; set; }
         public string? Name { get; set; }

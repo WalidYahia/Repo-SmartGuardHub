@@ -2,6 +2,12 @@
 {
     public class GeneralResponse
     {
+        /// <summary>
+        /// A unique identifier for the request
+        /// For mobile app mqtt-subscribe (each mobile app process only recieved ack of its actions).
+        /// </summary>
+        public string RequestId { get; set; }
+
         public DeviceResponseState State { get; set; } = DeviceResponseState.Error;
 
         public dynamic DevicePayload { get; set; }

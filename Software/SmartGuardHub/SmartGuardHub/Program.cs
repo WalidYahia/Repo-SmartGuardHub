@@ -36,13 +36,11 @@ builder.Services.AddHostedService<LogCleanupService>();
 
 builder.Services.AddSingleton<ConfigurationService>();
 
-
 // HTTP Client for REST protocol
-builder.Services.AddHttpClient<RestProtocol>(client =>
+builder.Services.AddHttpClient<IDeviceProtocol, RestProtocol>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(10);
 });
-
 
 // user command handler
 builder.Services.AddScoped<UserCommandHandler>();
@@ -59,7 +57,6 @@ builder.Services.AddScoped<UserCommand, LoadAllUnitsCommand>();
 
 
 // Protocols
-builder.Services.AddScoped<IDeviceProtocol, RestProtocol>();
 builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ISystemUnit, SonOffMiniR>();
 builder.Services.AddScoped<IAsyncInitializer, DeviceService>();
@@ -103,6 +100,12 @@ using (var scope = app.Services.CreateScope())
 // Start MQTT service
 var mqttService = app.Services.GetRequiredService<IMqttService>();
 await mqttService.StartAsync();
+
+// force resolve at startup
+using (var scope = app.Services.CreateScope())
+{
+    var handler = scope.ServiceProvider.GetRequiredService<UserCommandHandler>();
+}
 
 // Call async initialization before app starts handling requests
 using (var scope = app.Services.CreateScope())

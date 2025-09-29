@@ -19,6 +19,9 @@ namespace SmartGuardHub.Protocols.MQTT
         private readonly IServiceProvider _serviceProvider;
         private readonly ConfigurationService _config;
 
+        // Event so other parts of app can react to incoming messages
+        public event Func<MqttMessageModel, Task> ProcessMessageReceived;
+
         public MqttService(IServiceProvider serviceProvider, ConfigurationService configService)
         {
             _config = configService;
@@ -72,10 +75,6 @@ namespace SmartGuardHub.Protocols.MQTT
 
             // Start the client
             await ConnectAsync(3);
-
-            // Subscribe to all topics
-            await SubscribeAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Publish));
-            await SubscribeAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Publish));
         }
 
         /// <summary>
@@ -150,6 +149,11 @@ namespace SmartGuardHub.Protocols.MQTT
         private async Task OnConnected(MqttClientConnectedEventArgs e)
         {
             Console.WriteLine("MQTT client connected");
+
+            // Subscribe to all topics
+            await SubscribeAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Publish));
+            await SubscribeAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Publish));
+
             await Task.CompletedTask;
         }
 
@@ -191,11 +195,28 @@ namespace SmartGuardHub.Protocols.MQTT
 
             Console.WriteLine($"Received message on topic {topic}: {payload}");
 
-            // Trigger the event for other parts of your application
+            var mqttReceivedModel = new MqttMessageModel
+            {
+                Topic = topic,
+                Payload = payload
+            };
+
+            Console.WriteLine($"📩 Received message on {topic}: {payload}");
+
+            if (ProcessMessageReceived != null)
+            {
+                // Await all attached handlers
+                foreach (var handler in ProcessMessageReceived.GetInvocationList().Cast<Func<MqttMessageModel, Task>>())
+                {
+                    await handler(mqttReceivedModel);
+                }
+            }
         }
 
         private async Task HandleReceivedMessages(string topic, string payload)
         {
+
+
             string remoteAction = SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Publish);
             string remoteUpdate = SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Publish);
 

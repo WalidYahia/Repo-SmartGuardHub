@@ -120,7 +120,8 @@ namespace SmartGuardHub.Features.DeviceManagement
                 CreatedAt = device.CreatedAt,
                 RawResponse = device.RawResponse,
                 IsInInchingMode = device.IsInInchingMode,
-                InchingModeWidthInMs = device.InchingModeWidthInMs
+                InchingModeWidthInMs = device.InchingModeWidthInMs,
+                LatestValue = device.LatestValue
             };
         }
         private static Device MapToDevice(SensorDTO deviceDto)
@@ -141,6 +142,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                 RawResponse = deviceDto.RawResponse,
                 InchingModeWidthInMs = deviceDto.InchingModeWidthInMs,
                 IsInInchingMode = deviceDto.IsInInchingMode,
+                LatestValue = (string?)deviceDto.LatestValue
             };
         }
     }

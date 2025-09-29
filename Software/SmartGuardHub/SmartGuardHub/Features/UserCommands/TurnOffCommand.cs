@@ -17,7 +17,7 @@ namespace SmartGuardHub.Features.UserCommands
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)
         {
-            var installedDevice = await LoadInstalledSensor(jsonCommand.InstalledSensorId);
+            var installedDevice = await LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
 
             if (installedDevice != null)
             {

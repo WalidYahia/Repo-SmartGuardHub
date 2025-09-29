@@ -40,6 +40,8 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         public int InchingModeWidthInMs { get; set; }
 
+        public string? LatestValue { get; set; }
+
         public string? FwVersion { get; set; }
 
         // Device-specific properties as JSON
@@ -80,6 +82,8 @@ namespace SmartGuardHub.Features.DeviceManagement
         public bool IsInInchingMode { get; set; }
 
         public int InchingModeWidthInMs { get; set; }
+
+        public object LatestValue { get; set; }
 
         public string? FwVersion { get; set; }
 

@@ -36,7 +36,7 @@ namespace SmartGuardHub.Features.UserCommands
 
             try
             {
-                var installedDevice = await LoadInstalledSensor(jsonCommand.InstalledSensorId);
+                var installedDevice = await LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
 
                 if (installedDevice != null)
                 {
