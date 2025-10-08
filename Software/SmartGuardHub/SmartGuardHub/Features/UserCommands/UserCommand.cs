@@ -44,9 +44,9 @@ namespace SmartGuardHub.Features.UserCommands
             return jsonCommand.CommandPayload == null ? false : true;
         }
 
-        protected async Task<SensorDTO> LoadInstalledSensor(int installedDeviceId)
+        protected async Task<SensorDTO> LoadInstalledSensor(string installedDeviceId)
         {
-            var device = SystemManager.InstalledSensors.FirstOrDefault(d => d.Id == installedDeviceId);
+            var device = SystemManager.InstalledSensors.FirstOrDefault(d => d.SensorId == installedDeviceId);
 
             return device;
         }
@@ -82,7 +82,7 @@ namespace SmartGuardHub.Features.UserCommands
     {
         public string? UnitId { get; set; }
         public SwitchOutlet SwitchNo { get; set; }
-        public int InstalledSensorId { get; set; }
+        public string InstalledSensorId { get; set; }
 
         public UnitType DeviceType { get; set; }
         public string? Name { get; set; }

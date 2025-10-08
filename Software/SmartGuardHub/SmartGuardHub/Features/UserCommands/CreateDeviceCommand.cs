@@ -53,6 +53,7 @@ namespace SmartGuardHub.Features.UserCommands
 
                 SensorDTO sensorDTO = new SensorDTO
                 {
+                    SensorId = jsonCommand.CommandPayload.UnitId + "_" + ((int)jsonCommand.CommandPayload.SwitchNo).ToString(),
                     UnitId = jsonCommand.CommandPayload.UnitId,
                     SwitchNo = jsonCommand.CommandPayload.SwitchNo,
                     Name = jsonCommand.CommandPayload.Name,

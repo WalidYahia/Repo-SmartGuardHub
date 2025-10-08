@@ -52,19 +52,33 @@ namespace SmartGuardHub.Features.DeviceManagement
             return device != null ? MapToDeviceDTO(device) : null;
         }
 
-        public async Task<Device> CreateDeviceAsync(SensorDTO deviceDTO)
+        public async Task<Sensor> CreateDeviceAsync(SensorDTO deviceDTO)
         {
+
+            try
+            {
+
+
             // Check if device already exists
             var existingDevice = await _deviceRepository.GetByDeviceIdAndSwitchAsync(deviceDTO.UnitId, (int)deviceDTO.SwitchNo);
-            if (existingDevice != null)
+
+                if (existingDevice != null)
+                {
+                    throw new InvalidOperationException($"Device with ID {deviceDTO.UnitId} and switch no. {(int)deviceDTO.SwitchNo} already exists");
+                }
+            }
+            catch (Exception ex)
             {
-                throw new InvalidOperationException($"Device with ID {deviceDTO.UnitId} and switch no. {(int)deviceDTO.SwitchNo} already exists");
+
+                throw;
             }
 
-            var device = new Device
+
+            var device = new Sensor
             {
+                SensorId = deviceDTO.SensorId,
                 Name = deviceDTO.Name,
-                DeviceId = deviceDTO.UnitId,
+                UnitId = deviceDTO.UnitId,
                 Url = deviceDTO.Url,
                 SwitchNo = (int)deviceDTO.SwitchNo,
                 Type = (int)deviceDTO.Type,
@@ -77,24 +91,24 @@ namespace SmartGuardHub.Features.DeviceManagement
             };
 
             var createdDevice = await _deviceRepository.CreateAsync(device);
-            _logger.LogInformation("Created new device: {0} ({1}) - SW.{2}", device.Name, device.DeviceId, (int)deviceDTO.SwitchNo);
+            _logger.LogInformation("Created new device: {0} ({1}) - SW.{2}", device.Name, device.UnitId, (int)deviceDTO.SwitchNo);
 
             return createdDevice;
         }
 
-        public async Task<Device> UpdateDeviceAsync(SensorDTO deviceDTO)
+        public async Task<Sensor> UpdateDeviceAsync(SensorDTO deviceDTO)
         {
             var device = MapToDevice(deviceDTO);
 
             var updatedDevice = await _deviceRepository.UpdateAsync(device);
-            _logger.LogInformation("Updated device: {0}-SW.{1} [{2}] ", device.DeviceId, (int)deviceDTO.SwitchNo, device.Name);
+            _logger.LogInformation("Updated device: {0}-SW.{1} [{2}] ", device.UnitId, (int)deviceDTO.SwitchNo, device.Name);
 
             return updatedDevice;
         }
 
         public async Task<bool> DeleteDeviceAsync(SensorDTO deviceDTO)
         {
-            var success = await _deviceRepository.DeleteAsync(deviceDTO.Id);
+            var success = await _deviceRepository.DeleteAsync(deviceDTO.SensorId);
             if (success)
             {
                 _logger.LogInformation("Deleted device: {0} ({1}) - SW.{2}", deviceDTO.Name, deviceDTO.UnitId, (int)deviceDTO.SwitchNo);
@@ -103,13 +117,13 @@ namespace SmartGuardHub.Features.DeviceManagement
             return success;
         }
 
-        private static SensorDTO MapToDeviceDTO(Device device)
+        private static SensorDTO MapToDeviceDTO(Sensor device)
         {
             return new SensorDTO
             {
-                Id = device.Id,
+                SensorId = device.SensorId,
                 Name = device.Name,
-                UnitId = device.DeviceId,
+                UnitId = device.UnitId,
                 Url = device.Url,
                 SwitchNo = (SwitchOutlet)device.SwitchNo,
                 Type = (UnitType)device.Type,
@@ -124,13 +138,13 @@ namespace SmartGuardHub.Features.DeviceManagement
                 LatestValue = device.LatestValue
             };
         }
-        private static Device MapToDevice(SensorDTO deviceDto)
+        private static Sensor MapToDevice(SensorDTO deviceDto)
         {
-            return new Device
+            return new Sensor
             {
-                Id = deviceDto.Id,
+                SensorId = deviceDto.SensorId,
                 Name = deviceDto.Name,
-                DeviceId = deviceDto.UnitId,
+                UnitId = deviceDto.UnitId,
                 Url = deviceDto.Url,
                 SwitchNo = (int)deviceDto.SwitchNo,
                 Type = (int)deviceDto.Type,

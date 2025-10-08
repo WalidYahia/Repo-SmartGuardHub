@@ -13,8 +13,12 @@ namespace SmartGuardHub.Features.UserCommands
         private readonly IEnumerable<UserCommand> _userCommands;
         private readonly LoggingService _loggingService;
         private readonly IMqttService _mqttService;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public UserCommandHandler(IEnumerable<UserCommand> userCommands, LoggingService loggingService, IMqttService mqttService)
+        public UserCommandHandler(IEnumerable<UserCommand> userCommands,
+            LoggingService loggingService,
+            IMqttService mqttService,
+            IServiceScopeFactory scopeFactory)
         {
             _userCommands = userCommands;
             _loggingService = loggingService;
@@ -22,46 +26,60 @@ namespace SmartGuardHub.Features.UserCommands
             Console.WriteLine("++++++++++++++++++++++++++++UserCommandHandler created, subscribing to MQTT.");
 
             _mqttService = mqttService;
-            _mqttService.ProcessMessageReceived += HandleMqttMessageAsync;
+            _scopeFactory = scopeFactory;
         }
 
-        public async Task<GeneralResponse> HandleUserCommand(JsonCommand jsonCommand)
+        public async Task<GeneralResponse> HandleApiUserCommand(JsonCommand jsonCommand)
         {
             if (jsonCommand == null)
             {
-                await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, $"HandleUserCommand - Command Is Null");
+                return await HandleNullCommand();
+            }
+            else
+                return await ExcuteCommand(jsonCommand);
+        }
 
-                return new GeneralResponse
-                {
-                    State = DeviceResponseState.NoContent,
-                    DevicePayload = "NoContent"
-                };
+        public async Task HandleMqttUserCommand(MqttMessageModel recievedModel)
+        {
+            var jsonCommand = JsonSerializer.Deserialize<JsonCommand>(recievedModel.Payload);
+
+            GeneralResponse result = null;
+
+            if (jsonCommand == null)
+            {
+                result = await HandleNullCommand();
             }
 
+            if (recievedModel.Topic.Contains(MqttTopics.RemoteActionTopic_Publish))
+            {
+                result = await ExcuteCommand(jsonCommand);
+
+                result.RequestId = jsonCommand.RequestId;
+
+                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Ack), result, retainFlag: false);
+            }
+            else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
+            {
+
+            }
+        }
+
+        private async Task<GeneralResponse> ExcuteCommand(JsonCommand jsonCommand)
+        {
             UserCommand? deviceCommand = _userCommands.FirstOrDefault(c => c.jsonCommandType == jsonCommand.JsonCommandType);
 
             return await deviceCommand.ExecuteCommandAsync(jsonCommand);
         }
 
-        private async Task HandleMqttMessageAsync(MqttMessageModel recievedModel)
+        private async Task<GeneralResponse> HandleNullCommand()
         {
-            var jsonCommand = JsonSerializer.Deserialize<JsonCommand>(recievedModel.Payload);
+            await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, $"HandleUserCommand - Command Is Null");
 
-            if (jsonCommand != null)
+            return new GeneralResponse
             {
-                if (recievedModel.Topic.Contains(MqttTopics.RemoteActionTopic_Publish))
-                {
-                    var result = await HandleUserCommand(jsonCommand);
-
-                    result.RequestId = jsonCommand.RequestId;
-
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Ack), result, retainFlag: false);
-                }
-                else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
-                {
-
-                }
-            }
+                State = DeviceResponseState.NoContent,
+                DevicePayload = "NoContent"
+            };
         }
     }
 }

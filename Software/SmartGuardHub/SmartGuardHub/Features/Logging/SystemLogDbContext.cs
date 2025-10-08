@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SmartGuardHub.Features.DeviceManagement;
-using SmartGuardHub.Features.Users;
 using SmartGuardHub.Infrastructure;
 
 namespace SmartGuardHub.Features.Logging

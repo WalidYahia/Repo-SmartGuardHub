@@ -10,6 +10,7 @@
 
         public enum SwitchOutlet
         {
+            Unknown = -1,
             First = 0,
             Second = 1,
             Third = 2,

@@ -44,7 +44,7 @@ namespace SmartGuardHub.Features.DeviceManagement
 
             try
             {
-                var result = await _userCommandHandler.HandleUserCommand(jsonCommand);
+                var result = await _userCommandHandler.HandleApiUserCommand(jsonCommand);
 
                 switch (result.State)
                 {

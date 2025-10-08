@@ -4,16 +4,16 @@ namespace SmartGuardHub.Features.DeviceManagement
 {
     public interface IDeviceRepository
     {
-        Task<IEnumerable<Device>> GetAllAsync();
-        Task<Device?> GetByIdAsync(int id);
-        Task<Device?> GetDeviceByName(string name);
-        Task<Device?> GetByDeviceIdAndSwitchAsync(string deviceId, int switchNo);
-        Task<IEnumerable<Device>> GetByDeviceIdAsync(string deviceId);
-        Task<Device> CreateAsync(Device device);
-        Task<Device> UpdateAsync(Device device);
-        Task<bool> DeleteAsync(int id);
-        Task<IEnumerable<Device>> GetByProtocolAsync(UnitProtocolType protocol);
-        Task<IEnumerable<Device>> GetOnlineDevicesAsync();
-        Task UpdateLastSeenAsync(int id);
+        Task<IEnumerable<Sensor>> GetAllAsync();
+        Task<Sensor?> GetByIdAsync(string id);
+        Task<Sensor?> GetDeviceByName(string name);
+        Task<Sensor?> GetByDeviceIdAndSwitchAsync(string deviceId, int switchNo);
+        Task<IEnumerable<Sensor>> GetByDeviceIdAsync(string deviceId);
+        Task<Sensor> CreateAsync(Sensor device);
+        Task<Sensor> UpdateAsync(Sensor device);
+        Task<bool> DeleteAsync(string id);
+        Task<IEnumerable<Sensor>> GetByProtocolAsync(UnitProtocolType protocol);
+        Task<IEnumerable<Sensor>> GetOnlineDevicesAsync();
+        Task UpdateLastSeenAsync(string id);
     }
 }

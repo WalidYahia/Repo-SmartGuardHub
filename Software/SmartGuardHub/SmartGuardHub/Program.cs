@@ -64,6 +64,7 @@ builder.Services.AddScoped<IAsyncInitializer, DeviceService>();
 builder.Services.AddScoped<ISystemLogRepository, SystemLogRepository>();
 
 builder.Services.AddMqttService(); // Add this line
+builder.Services.AddSingleton<MqttMessageListener>(); // runs once for app lifetime
 
 // Logging
 builder.Services.AddLogging(logging =>
@@ -104,7 +105,7 @@ await mqttService.StartAsync();
 // force resolve at startup
 using (var scope = app.Services.CreateScope())
 {
-    var handler = scope.ServiceProvider.GetRequiredService<UserCommandHandler>();
+    var handler = scope.ServiceProvider.GetRequiredService<MqttMessageListener>();
 }
 
 // Call async initialization before app starts handling requests
