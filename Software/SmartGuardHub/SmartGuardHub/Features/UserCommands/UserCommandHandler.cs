@@ -1,10 +1,12 @@
-﻿using System.Text.Json;
+﻿using System.Data;
+using System.Text.Json;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
 using SmartGuardHub.Protocols.MQTT;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.UserCommands
 {
@@ -62,6 +64,9 @@ namespace SmartGuardHub.Features.UserCommands
             {
 
             }
+
+            if (result != null && result.State == DeviceResponseState.OK)
+                UpdateTopic(jsonCommand.CommandPayload.InstalledSensorId, jsonCommand.JsonCommandType);
         }
 
         private async Task<GeneralResponse> ExcuteCommand(JsonCommand jsonCommand)
@@ -80,6 +85,20 @@ namespace SmartGuardHub.Features.UserCommands
                 State = DeviceResponseState.NoContent,
                 DevicePayload = "NoContent"
             };
+        }
+
+        private async Task UpdateTopic(string sensorId, JsonCommandType jsonCommandType)
+        {
+            switch (jsonCommandType)
+            {
+                case JsonCommandType.TurnOn:
+                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.On }, retainFlag: true);
+                    break;
+
+                case JsonCommandType.TurnOff:
+                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.Off }, retainFlag: true);
+                    break;
+            }
         }
     }
 }

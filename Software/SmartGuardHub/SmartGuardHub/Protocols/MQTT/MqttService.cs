@@ -90,7 +90,7 @@ namespace SmartGuardHub.Protocols.MQTT
             {
                 await TryConnectAsync();
 
-                await Task.Delay(1000);
+                await Task.Delay(3000);
             }
         }
 
@@ -140,9 +140,16 @@ namespace SmartGuardHub.Protocols.MQTT
 
         private async Task TryConnectAsync()
         {
-            if (_mqttClient != null)
+            try
             {
-                await _mqttClient.ConnectAsync(_mqttClientTlsOptions);
+                if (_mqttClient != null)
+                {
+                    await _mqttClient.ConnectAsync(_mqttClientTlsOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                await Log(LogLevel.ERROR, LogMessageKey.MqttNotConnected, "Cannot Connect To Mqtt Server", ex);
             }
         }
 

@@ -13,24 +13,28 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// Resolve full absolute paths for both databases
-var mainDatabasePath = builder.Configuration.GetConnectionString("MainDatabasePath");
-var systemLogDatabasePath = builder.Configuration.GetConnectionString("SystemLogDatabasePath");
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddDbContext<SmartGuardDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("MainDatabaseConnection")));
 
-// Register contexts with corrected absolute paths
-builder.Services.AddDbContext<SmartGuardDbContext>(options =>
-    options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, mainDatabasePath)}"));
+    builder.Services.AddDbContext<SystemLogDbContext>(options =>
+        options.UseSqlite(builder.Configuration.GetConnectionString("SystemLogDatabaseConnection")));
+}
+else
+{
+    // Resolve full absolute paths for both databases
+    var mainDatabasePath = builder.Configuration.GetConnectionString("MainDatabasePath");
+    var systemLogDatabasePath = builder.Configuration.GetConnectionString("SystemLogDatabasePath");
 
-builder.Services.AddDbContext<SystemLogDbContext>(options =>
-    options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, systemLogDatabasePath)}"));
+    // Register contexts with corrected absolute paths
+    builder.Services.AddDbContext<SmartGuardDbContext>(options =>
+        options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, mainDatabasePath)}"));
 
+    builder.Services.AddDbContext<SystemLogDbContext>(options =>
+        options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, systemLogDatabasePath)}"));
+}
 
-//// Configure Entity Framework with SQLite
-//builder.Services.AddDbContext<SmartGuardDbContext>(options =>
-//    options.UseSqlite(builder.Configuration.GetConnectionString("MainDatabaseConnection")));
-
-//builder.Services.AddDbContext<SystemLogDbContext>(options =>
-//    options.UseSqlite(builder.Configuration.GetConnectionString("SystemLogDatabaseConnection")));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
