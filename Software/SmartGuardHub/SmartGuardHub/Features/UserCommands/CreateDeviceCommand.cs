@@ -18,7 +18,7 @@ namespace SmartGuardHub.Features.UserCommands
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)
         {
-            if (string.IsNullOrEmpty(jsonCommand.CommandPayload.UnitId) || string.IsNullOrEmpty(jsonCommand.CommandPayload.Name))
+            if (string.IsNullOrEmpty(jsonCommand.CommandPayload.UnitId) || jsonCommand.CommandPayload.DeviceType == Enums.UnitType.Unknown || string.IsNullOrEmpty(jsonCommand.CommandPayload.Name))
             {
                 return new GeneralResponse
                 {

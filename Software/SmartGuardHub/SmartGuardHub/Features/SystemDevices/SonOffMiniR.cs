@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
 using static SmartGuardHub.Infrastructure.Enums;
@@ -158,6 +159,9 @@ namespace SmartGuardHub.Features.SystemDevices
         public async Task<GeneralResponse> SendCommandAsync(string destination, string command, object? parameters = null)
         {
             var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == ProtocolType);
+
+            if(SystemManager.IsOnPi)
+                destination = destination.Replace(":8081", ".local:8081");
 
             var result = await protocol.SendCommandAsync(destination, command, parameters);
 

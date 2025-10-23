@@ -40,7 +40,7 @@ namespace SmartGuardHub.Protocols.MQTT
 
             string broker = _config.MqttConfig.Broker;
             int port = _config.MqttConfig.Port;
-            string clientId = _config.MqttConfig.ClientId;
+            string clientId = SystemManager.DeviceId;
             string username = _config.MqttConfig.Username;
             string password = _config.MqttConfig.Password;
             bool useTls = _config.MqttConfig.UseTls;

@@ -2,7 +2,6 @@
     "Broker": "5cb35f5ee0c643b58bc4c341167c1687.s1.eu.hivemq.cloud",
     "Port": 8883,
     "UseTls": true,
-    "ClientId": "SmartGuard-1",
     "Username": "smartGuard",
     "Password": "WWyy_0106116"
 }

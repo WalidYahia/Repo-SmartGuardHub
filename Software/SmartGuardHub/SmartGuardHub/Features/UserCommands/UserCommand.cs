@@ -82,9 +82,9 @@ namespace SmartGuardHub.Features.UserCommands
     {
         public string? UnitId { get; set; }
         public SwitchOutlet SwitchNo { get; set; }
-        public string InstalledSensorId { get; set; }
+        public string? InstalledSensorId { get; set; }
 
-        public UnitType DeviceType { get; set; }
+        public UnitType DeviceType { get; set; } = UnitType.Unknown;
         public string? Name { get; set; }
         public int InchingTimeInMs { get; set; }
     }

@@ -13,12 +13,24 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// Configure Entity Framework with SQLite
+// Resolve full absolute paths for both databases
+var mainDatabasePath = builder.Configuration.GetConnectionString("MainDatabasePath");
+var systemLogDatabasePath = builder.Configuration.GetConnectionString("SystemLogDatabasePath");
+
+// Register contexts with corrected absolute paths
 builder.Services.AddDbContext<SmartGuardDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("MainDatabaseConnection")));
+    options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, mainDatabasePath)}"));
 
 builder.Services.AddDbContext<SystemLogDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("SystemLogDatabaseConnection")));
+    options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, systemLogDatabasePath)}"));
+
+
+//// Configure Entity Framework with SQLite
+//builder.Services.AddDbContext<SmartGuardDbContext>(options =>
+//    options.UseSqlite(builder.Configuration.GetConnectionString("MainDatabaseConnection")));
+
+//builder.Services.AddDbContext<SystemLogDbContext>(options =>
+//    options.UseSqlite(builder.Configuration.GetConnectionString("SystemLogDatabaseConnection")));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -74,6 +86,16 @@ builder.Services.AddLogging(logging =>
 });
 
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5000); // HTTP
+    //options.ListenAnyIP(5001, listenOptions =>
+    //{
+    //    listenOptions.UseHttps(); // HTTPS if you configured a cert
+    //});
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -81,6 +103,16 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+}
+
+SystemManager.InitSystemEnvironment();
+
+// Ensure database folder exists
+var dbPath = Path.Combine(AppContext.BaseDirectory, "Database", "Production");
+if (!Directory.Exists(dbPath))
+{
+    Directory.CreateDirectory(dbPath);
+    Console.WriteLine($"Created missing database folder: {dbPath}");
 }
 
 // Ensure database is created
