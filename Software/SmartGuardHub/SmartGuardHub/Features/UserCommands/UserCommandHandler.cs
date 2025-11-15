@@ -43,30 +43,39 @@ namespace SmartGuardHub.Features.UserCommands
 
         public async Task HandleMqttUserCommand(MqttMessageModel recievedModel)
         {
-            var jsonCommand = JsonSerializer.Deserialize<JsonCommand>(recievedModel.Payload);
-
             GeneralResponse result = null;
 
-            if (jsonCommand == null)
+            try
             {
-                result = await HandleNullCommand();
+                var jsonCommand = JsonSerializer.Deserialize<JsonCommand>(recievedModel.Payload);
+
+                if (jsonCommand == null)
+                {
+                    result = await HandleNullCommand();
+                }
+
+                if (recievedModel.Topic.Contains(MqttTopics.RemoteActionTopic_Publish))
+                {
+                    result = await ExcuteCommand(jsonCommand);
+
+                    result.RequestId = jsonCommand.RequestId;
+
+                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Ack), result, retainFlag: false);
+                }
+                else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
+                {
+
+                }
+
+                if (result != null && result.State == DeviceResponseState.OK)
+                    UpdateTopic(jsonCommand.CommandPayload.InstalledSensorId, jsonCommand.JsonCommandType);
             }
-
-            if (recievedModel.Topic.Contains(MqttTopics.RemoteActionTopic_Publish))
+            catch (Exception ex)
             {
-                result = await ExcuteCommand(jsonCommand);
-
-                result.RequestId = jsonCommand.RequestId;
+                result = new GeneralResponse { State = DeviceResponseState.Error, RequestId = "Failed to parse Json" };
 
                 _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Ack), result, retainFlag: false);
             }
-            else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
-            {
-
-            }
-
-            if (result != null && result.State == DeviceResponseState.OK)
-                UpdateTopic(jsonCommand.CommandPayload.InstalledSensorId, jsonCommand.JsonCommandType);
         }
 
         private async Task<GeneralResponse> ExcuteCommand(JsonCommand jsonCommand)

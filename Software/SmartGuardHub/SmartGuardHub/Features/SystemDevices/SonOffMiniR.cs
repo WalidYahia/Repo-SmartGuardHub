@@ -160,7 +160,7 @@ namespace SmartGuardHub.Features.SystemDevices
         {
             var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == ProtocolType);
 
-            if(SystemManager.IsOnPi)
+            if(SystemManager.IsRaspberryPi)
                 destination = destination.Replace(":8081", ".local:8081");
 
             var result = await protocol.SendCommandAsync(destination, command, parameters);

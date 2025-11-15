@@ -6,6 +6,7 @@ using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.UserCommands;
 using SmartGuardHub.Infrastructure;
+using SmartGuardHub.Network;
 using SmartGuardHub.Protocols;
 using SmartGuardHub.Protocols.MQTT;
 
@@ -51,6 +52,8 @@ builder.Services.AddScoped<DeviceCommunicationManager>();
 builder.Services.AddHostedService<LogCleanupService>();
 
 builder.Services.AddSingleton<ConfigurationService>();
+
+builder.Services.AddScoped<NetworkConfigurationManager>();
 
 // HTTP Client for REST protocol
 builder.Services.AddHttpClient<IDeviceProtocol, RestProtocol>(client =>
@@ -109,14 +112,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-SystemManager.InitSystemEnvironment();
+await SystemManager.InitSystemEnvironment();
 
 // Ensure database folder exists
 var dbPath = Path.Combine(AppContext.BaseDirectory, "Database", "Production");
 if (!Directory.Exists(dbPath))
 {
     Directory.CreateDirectory(dbPath);
-    Console.WriteLine($"Created missing database folder: {dbPath}");
+    Console.WriteLine($"********************* Created missing database folder: {dbPath}");
 }
 
 // Ensure database is created
@@ -150,6 +153,8 @@ using (var scope = app.Services.CreateScope())
     var initializer = scope.ServiceProvider.GetRequiredService<IAsyncInitializer>();
     await initializer.InitializeAsync();
 }
+
+Console.WriteLine($"********************* app.UseHttpsRedirection(): {dbPath}");
 
 app.UseHttpsRedirection();
 

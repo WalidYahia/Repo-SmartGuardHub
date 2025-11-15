@@ -13,6 +13,8 @@ namespace SmartGuardHub.Protocols.MQTT
 {
     public class MqttService : IMqttService
     {
+        private bool _isConnecting = false;
+
         private IMqttClient _mqttClient;
         private MqttClientOptions _mqttClientTlsOptions;
 
@@ -74,7 +76,7 @@ namespace SmartGuardHub.Protocols.MQTT
             _mqttClient.DisconnectedAsync += OnDisconnected;
 
             // Start the client
-            await ConnectAsync(3);
+            //await ConnectAsync(1);
         }
 
         /// <summary>
@@ -85,12 +87,20 @@ namespace SmartGuardHub.Protocols.MQTT
         /// <returns></returns>
         public async Task ConnectAsync(int trialsCount)
         {
-            int x = 0;
-            while (_mqttClient?.IsConnected != true && (trialsCount == -1 || x < trialsCount))
+            if (!_isConnecting)
             {
-                await TryConnectAsync();
+                _isConnecting = true;
 
-                await Task.Delay(3000);
+                int x = 0;
+                while (_mqttClient?.IsConnected != true && (trialsCount == -1 || x < trialsCount))
+                {
+                    Console.WriteLine(DateTime.Now.ToString() + "> > > ConnectAsync to MQTT");
+                    await TryConnectAsync();
+
+                    await Task.Delay(3000);
+                }
+
+                _isConnecting = false;
             }
         }
 
@@ -144,6 +154,7 @@ namespace SmartGuardHub.Protocols.MQTT
             {
                 if (_mqttClient != null)
                 {
+                    Console.WriteLine(DateTime.Now.ToString() + "> > > Try Connect to MQTT");
                     await _mqttClient.ConnectAsync(_mqttClientTlsOptions);
                 }
             }

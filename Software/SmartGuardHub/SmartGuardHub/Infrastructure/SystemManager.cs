@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using SmartGuardHub.Features.DeviceManagement;
 
 namespace SmartGuardHub.Infrastructure
@@ -9,7 +10,7 @@ namespace SmartGuardHub.Infrastructure
     {
         public static string DeviceId { get; set; }
 
-        public static bool IsOnPi { get; set; }
+        public static bool IsRaspberryPi { get; set; }
 
         //public List<DeviceDTO> Devices = new List<DeviceDTO>();
         public static ConcurrentBag<SensorDTO> InstalledSensors = new ConcurrentBag<SensorDTO>();
@@ -41,7 +42,7 @@ namespace SmartGuardHub.Infrastructure
             return DeviceId + "/" + topicName;
         }
 
-        public static void InitSystemEnvironment()
+        public static async Task InitSystemEnvironment()
         {
             // Linux or Windows
             CheckEnvironment();
@@ -53,20 +54,20 @@ namespace SmartGuardHub.Infrastructure
             DeviceId = "SmartGuard-" + cpuSerial;
 
             // Set Hostname
-            SetHostname(DeviceId);
+            await SetHostname(DeviceId);
         }
 
         public static void CheckEnvironment()
         {
-            IsOnPi = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+            IsRaspberryPi = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
 
-            Console.WriteLine($"++++++++ Environment: {IsOnPi} ++++++++");
+            Console.WriteLine($"++++++++ Environment: {IsRaspberryPi} ++++++++");
         }
         private static string GetCpuSerial()
         {
             string cpuSerial = "unknownCpuSerial";
 
-            if (IsOnPi)
+            if (IsRaspberryPi)
             {
                 try
                 {
@@ -95,9 +96,9 @@ namespace SmartGuardHub.Infrastructure
 
             return cpuSerial;
         }
-        private static void SetHostname(string newHostname)
+        private static async Task SetHostname(string newHostname)
         {
-            if(IsOnPi)
+            if(IsRaspberryPi)
             {
                 try
                 {
@@ -114,7 +115,7 @@ namespace SmartGuardHub.Infrastructure
                     File.WriteAllText("/etc/hosts", hosts);
 
                     // Apply immediately (temporary until reboot)
-                    RunCommand($"hostnamectl set-hostname {newHostname}");
+                    await ExecuteCommandAsync($"hostnamectl set-hostname {newHostname}");
 
                     Console.WriteLine($"++++++++ Hostname changed to: {newHostname} ++++++++");
                 }
@@ -124,7 +125,7 @@ namespace SmartGuardHub.Infrastructure
                 }
             }
         }
-        private static void RunCommand(string cmd)
+        public static async Task<string> ExecuteCommandAsync(string cmd, bool ignoreErrors = false)
         {
             var process = new Process
             {
@@ -139,7 +140,54 @@ namespace SmartGuardHub.Infrastructure
                 }
             };
             process.Start();
-            process.WaitForExit();
+
+            var output = await process.StandardOutput.ReadToEndAsync();
+            var error = await process.StandardError.ReadToEndAsync();
+
+            await process.WaitForExitAsync();
+
+
+            if (process.ExitCode != 0 && !ignoreErrors)
+            {
+                throw new Exception($"Command failed: {error}");
+            }
+
+            return output;
+        }
+
+        public static async Task WriteFileAsync(string directory, string fileName, string content, bool writeSafely = true)
+        {
+            // Ensure target directory exists
+            Directory.CreateDirectory(directory);
+
+            if (!writeSafely)
+            {
+                await File.WriteAllTextAsync(Path.Combine(directory, fileName), content);
+                return;
+            }
+
+            // Create temp file in the SAME directory to ensure atomic rename
+            string targetPath = Path.Combine(directory, fileName);
+            string tempPath = Path.Combine(directory, $"{fileName}.tmp_{Guid.NewGuid():N}");
+
+            try
+            {
+                await File.WriteAllTextAsync(tempPath, content, Encoding.UTF8);
+
+                // Atomic move (on same filesystem)
+                File.Move(tempPath, targetPath, overwrite: true);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error writing file '{targetPath}': {ex.Message}");
+                throw;
+            }
+            finally
+            {
+                // Clean up in case move failed
+                if (File.Exists(tempPath))
+                    File.Delete(tempPath);
+            }
         }
     }
 
