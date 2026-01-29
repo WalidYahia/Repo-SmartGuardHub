@@ -31,5 +31,7 @@ namespace SmartGuardHub.Features.Logging
         LoadConfig = 6,
         MqttNotConnected = 7,
         UserCommandHandler = 8,
+        ScanDevicesError = 9,
+        UserScenario = 10,
     }
 }

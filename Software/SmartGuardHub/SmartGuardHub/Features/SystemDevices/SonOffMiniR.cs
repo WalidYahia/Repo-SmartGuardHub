@@ -1,9 +1,11 @@
-﻿using System;
+﻿using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Features.Logging;
+using SmartGuardHub.Infrastructure;
+using SmartGuardHub.Protocols;
+using System;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using SmartGuardHub.Infrastructure;
-using SmartGuardHub.Protocols;
 using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.SystemDevices
@@ -171,6 +173,50 @@ namespace SmartGuardHub.Features.SystemDevices
             }
             else
                 return result;
+        }
+
+        public async Task<SensorDTO> MapRawInfoResponseToSensorDto(dynamic rawInfoResponse, SensorDTO sensorDTO)
+        {
+            SonoffMiniRResponsePayload unitResponse = rawInfoResponse as SonoffMiniRResponsePayload;
+
+            SensorDTO newSensorDTO = new SensorDTO();
+
+            if (unitResponse != null)
+            {
+                newSensorDTO.SensorId = sensorDTO.SensorId;
+                newSensorDTO.Name = sensorDTO.Name;
+                newSensorDTO.Type = sensorDTO.Type;
+                newSensorDTO.LatestValue = Enum.TryParse<SwitchOutletStatus>(unitResponse.Data.Switches.FirstOrDefault(o => o.Outlet == (int)sensorDTO.SwitchNo)?.Switch, true, out var status) ?
+                                            newSensorDTO.LatestValue = ((int)status).ToString()
+                                            : newSensorDTO.LatestValue = ((int)SwitchOutletStatus.Off).ToString();
+
+                var inschingData = unitResponse.Data.Pulses.FirstOrDefault(o => o.Outlet == sensorDTO.SwitchNo);
+
+                newSensorDTO.IsInInchingMode = (inschingData?.Switch == "on" && inschingData.Pulse == "on") ? true : false;
+                newSensorDTO.InchingModeWidthInMs = inschingData?.Width ?? 0;
+
+                newSensorDTO.CreatedAt = sensorDTO.CreatedAt;
+                newSensorDTO.SwitchNo = sensorDTO.SwitchNo;
+                newSensorDTO.FwVersion = sensorDTO.FwVersion;
+                newSensorDTO.IsOnline = sensorDTO.IsOnline;
+                newSensorDTO.Protocol = sensorDTO.Protocol;
+                newSensorDTO.UnitId = sensorDTO.UnitId;
+                newSensorDTO.Url = sensorDTO.Url;
+                newSensorDTO.RawResponse = sensorDTO.RawResponse;
+                newSensorDTO.LastTimeValueSet = sensorDTO.LastTimeValueSet;
+
+                if (newSensorDTO.LatestValue != sensorDTO.LatestValue)
+                {
+                    newSensorDTO.LastSeen = DateTime.Now;
+                    newSensorDTO.LastTimeValueSet = DateTime.Now;
+                }
+                else
+                {
+                    newSensorDTO.LastSeen = sensorDTO.LastSeen;
+                }
+            }
+
+            return newSensorDTO;
         }
     }
 }

@@ -26,7 +26,7 @@ namespace SmartGuardHub.Features.UserCommands
 
                 var inchingCommand = systemDevice.GetOffInchingCommand(installedDevice.UnitId, installedDevice.SwitchNo, (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
 
-                string jsonString = JsonConvert.SerializeObject(inchingCommand);
+                string jsonString = SystemManager.Serialize(inchingCommand);
 
                 GeneralResponse result = await systemDevice.SendCommandAsync(installedDevice.Url + systemDevice.InchingPath, jsonString);
 
@@ -34,6 +34,7 @@ namespace SmartGuardHub.Features.UserCommands
                 {
                     installedDevice.IsInInchingMode = false;
                     installedDevice.InchingModeWidthInMs = 0;
+                    installedDevice.LastSeen = DateTime.Now;
 
                     result.DevicePayload = installedDevice;
 

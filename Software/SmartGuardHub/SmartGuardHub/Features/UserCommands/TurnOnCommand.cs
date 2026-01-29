@@ -25,13 +25,15 @@ namespace SmartGuardHub.Features.UserCommands
 
                 var command = systemDevice.GetOnCommand(installedDevice.UnitId, installedDevice.SwitchNo);
 
-                string jsonString = JsonConvert.SerializeObject(command);
+                string jsonString = SystemManager.Serialize(command);
 
                 GeneralResponse result = await systemDevice.SendCommandAsync(installedDevice.Url + systemDevice.DataPath, jsonString);
 
                 if (result.State == DeviceResponseState.OK)
                 {
                     installedDevice.LatestValue = (int)SwitchOutletStatus.On;
+                    installedDevice.LastSeen = DateTime.Now;
+                    installedDevice.LastTimeValueSet = DateTime.Now;
 
                     result.DevicePayload = installedDevice;
 

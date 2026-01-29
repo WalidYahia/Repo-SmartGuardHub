@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using MQTTnet;
 using MQTTnet.Protocol;
+using Newtonsoft.Json;
 using SmartGuardHub.Configuration;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Infrastructure;
@@ -13,7 +14,7 @@ namespace SmartGuardHub.Protocols.MQTT
 {
     public class MqttService : IMqttService
     {
-        private bool _isConnecting = false;
+        private readonly SemaphoreSlim _connectionSemaphore = new SemaphoreSlim(1, 1);
 
         private IMqttClient _mqttClient;
         private MqttClientOptions _mqttClientTlsOptions;
@@ -87,29 +88,54 @@ namespace SmartGuardHub.Protocols.MQTT
         /// <returns></returns>
         public async Task ConnectAsync(int trialsCount)
         {
-            if (!_isConnecting)
+            // Try to acquire the semaphore (non-blocking check)
+            if (await _connectionSemaphore.WaitAsync(0))
             {
-                _isConnecting = true;
-
-                int x = 0;
-                while (_mqttClient?.IsConnected != true && (trialsCount == -1 || x < trialsCount))
+                try
                 {
-                    Console.WriteLine(DateTime.Now.ToString() + "> > > ConnectAsync to MQTT");
-                    await TryConnectAsync();
+                    // Already connected, no need to retry
+                    if (_mqttClient?.IsConnected == true)
+                    {
+                        return;
+                    }
 
-                    await Task.Delay(3000);
+                    int x = 0;
+                    while (_mqttClient?.IsConnected != true && (trialsCount == -1 || x < trialsCount))
+                    {
+                        Console.WriteLine(DateTime.Now.ToString() + "> > > ConnectAsync to MQTT");
+                        await TryConnectAsync();
+
+                        // Only delay if not connected and we should retry
+                        if (_mqttClient?.IsConnected != true && (trialsCount == -1 || x < trialsCount - 1))
+                        {
+                            await Task.Delay(3000);
+                        }
+                        x++;
+                    }
                 }
-
-                _isConnecting = false;
+                finally
+                {
+                    // Always release the semaphore, even if an exception occurs
+                    _connectionSemaphore.Release();
+                }
             }
         }
 
         public async Task DisconnectAsync()
         {
-            if (_mqttClient != null)
+            // Wait for any ongoing connection attempt to complete
+            await _connectionSemaphore.WaitAsync();
+            try
             {
-                await _mqttClient.DisconnectAsync();
-                _mqttClient.Dispose();
+                if (_mqttClient != null)
+                {
+                    await _mqttClient.DisconnectAsync();
+                    _mqttClient.Dispose();
+                }
+            }
+            finally
+            {
+                _connectionSemaphore.Release();
             }
         }
 
@@ -119,7 +145,7 @@ namespace SmartGuardHub.Protocols.MQTT
 
             if (_mqttClient.IsConnected)
             {
-                var json = JsonSerializer.Serialize(message);
+                var json = SystemManager.Serialize(message);
                 var payload = Encoding.UTF8.GetBytes(json);
 
                 var mqttMessage = new MqttApplicationMessageBuilder()
@@ -228,23 +254,6 @@ namespace SmartGuardHub.Protocols.MQTT
                 {
                     await handler(mqttReceivedModel);
                 }
-            }
-        }
-
-        private async Task HandleReceivedMessages(string topic, string payload)
-        {
-
-
-            string remoteAction = SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Publish);
-            string remoteUpdate = SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Publish);
-
-            if (topic.Contains(MqttTopics.RemoteActionTopic_Publish))
-            { 
-                
-            }
-            else if (topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
-            {
-
             }
         }
     }

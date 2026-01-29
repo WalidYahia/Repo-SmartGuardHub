@@ -29,6 +29,7 @@ namespace SmartGuardHub.Features.SystemDevices
         public string GetDeviceUrl(string deviceId);
         public UnitProtocolType GetDeviceProtocol();
         public GeneralResponse ParseResponse(GeneralResponse deviceResponse);
-
+        //public Task<SensorDTO_Mini> MapRawInfoResponseToDtoMini(object rawInfoResponse, SensorDTO sensorDTO);
+        public Task<SensorDTO> MapRawInfoResponseToSensorDto(object rawInfoResponse, SensorDTO sensorDTO);
     }
 }

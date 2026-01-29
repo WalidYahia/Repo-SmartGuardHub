@@ -1,14 +1,15 @@
-using System.Diagnostics.Metrics;
 using Microsoft.EntityFrameworkCore;
 using SmartGuardHub.Configuration;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.UserCommands;
+using SmartGuardHub.Features.UserScenarios;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Network;
 using SmartGuardHub.Protocols;
 using SmartGuardHub.Protocols.MQTT;
+using System.Diagnostics.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,11 +37,23 @@ else
         options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, systemLogDatabasePath)}"));
 }
 
+builder.Services.AddSingleton<IUserScenarioRepository, JsonUserScenarioRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//// Configure CORS for mobile app access
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowMobileApp", policy =>
+//    {
+//        policy.AllowAnyOrigin()
+//              .AllowAnyMethod()
+//              .AllowAnyHeader();
+//    });
+//});
 
 
 builder.Services.AddScoped<DeviceService>();
@@ -50,6 +63,10 @@ builder.Services.AddScoped<LoggingService>();
 builder.Services.AddScoped<DeviceCommunicationManager>();
 
 builder.Services.AddHostedService<LogCleanupService>();
+
+builder.Services.AddHostedService<DevicesScanner>();
+
+builder.Services.AddHostedService<UserScenarioWorker>();
 
 builder.Services.AddSingleton<ConfigurationService>();
 
@@ -84,6 +101,11 @@ builder.Services.AddScoped<ISystemLogRepository, SystemLogRepository>();
 
 builder.Services.AddMqttService(); // Add this line
 builder.Services.AddSingleton<MqttMessageListener>(); // runs once for app lifetime
+
+
+
+
+
 
 // Logging
 builder.Services.AddLogging(logging =>
@@ -156,7 +178,14 @@ using (var scope = app.Services.CreateScope())
 
 Console.WriteLine($"********************* app.UseHttpsRedirection(): {dbPath}");
 
-app.UseHttpsRedirection();
+//// Enable CORS before other middleware
+//app.UseCors("AllowMobileApp");
+
+//// Only use HTTPS redirection in production
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseHttpsRedirection();
+//}
 
 app.UseAuthorization();
 

@@ -71,11 +71,11 @@ namespace SmartGuardHub.Features.DeviceManagement
                             switch (jsonCommand.JsonCommandType)
                             {
                                 case JsonCommandType.TurnOn:
-                                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.CommandPayload.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.CommandPayload.InstalledSensorId.ToString(), Value = SwitchOutletStatus.On }, retainFlag: true);
+                                    //_mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.CommandPayload.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.CommandPayload.InstalledSensorId.ToString(), Value = SwitchOutletStatus.On }, retainFlag: true);
                                     break;
 
                                 case JsonCommandType.TurnOff:
-                                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.CommandPayload.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.CommandPayload.InstalledSensorId.ToString(), Value = SwitchOutletStatus.Off }, retainFlag: true);
+                                    //_mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.CommandPayload.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.CommandPayload.InstalledSensorId.ToString(), Value = SwitchOutletStatus.Off }, retainFlag: true);
                                     break;
                             }
                         }

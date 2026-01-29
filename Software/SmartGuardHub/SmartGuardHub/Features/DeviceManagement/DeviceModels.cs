@@ -40,6 +40,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         public int InchingModeWidthInMs { get; set; }
 
         public string? LatestValue { get; set; }
+        public DateTime LastTimeValueSet { get; set; }
 
         public string? FwVersion { get; set; }
 
@@ -80,9 +81,31 @@ namespace SmartGuardHub.Features.DeviceManagement
         public int InchingModeWidthInMs { get; set; }
 
         public object LatestValue { get; set; }
+        public DateTime LastTimeValueSet { get; set; }
 
         public string? FwVersion { get; set; }
 
         public string? RawResponse { get; set; }
+    }
+
+
+    public class SensorDTO_Mini
+    {
+        public string SensorId { get; set; }
+
+        public string UnitId { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public UnitType Type { get; set; }
+
+        public DateTime LastSeen { get; set; }
+
+        public bool IsInInchingMode { get; set; }
+
+        public int InchingModeWidthInMs { get; set; }
+
+        public object LatestValue { get; set; }
+        public DateTime LastTimeValueSet { get; set; }
     }
 }

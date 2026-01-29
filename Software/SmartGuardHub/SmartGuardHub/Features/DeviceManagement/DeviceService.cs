@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.ComponentModel;
+using System.Text.Json;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
@@ -29,7 +30,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         {
             SystemManager.InstalledSensors = new (await GetAllDevicesAsync());
 
-            _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.InstalledDevices), SystemManager.InstalledSensors, true);
+            _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.InstalledUnits), ToMini(SystemManager.InstalledSensors), true);
 
             _logger.LogInformation("Refreshed devices. Total devices: {Count}", SystemManager.InstalledSensors.Count);
         }
@@ -57,10 +58,8 @@ namespace SmartGuardHub.Features.DeviceManagement
 
             try
             {
-
-
-            // Check if device already exists
-            var existingDevice = await _deviceRepository.GetByDeviceIdAndSwitchAsync(deviceDTO.UnitId, (int)deviceDTO.SwitchNo);
+                // Check if device already exists
+                var existingDevice = await _deviceRepository.GetByDeviceIdAndSwitchAsync(deviceDTO.UnitId, (int)deviceDTO.SwitchNo);
 
                 if (existingDevice != null)
                 {
@@ -117,6 +116,16 @@ namespace SmartGuardHub.Features.DeviceManagement
             return success;
         }
 
+        public async Task<bool> UpdateListDeviceAsync(List<SensorDTO> deviceDTOList)
+        {
+            foreach (var deviceDTO in deviceDTOList)
+            {
+                await UpdateDeviceAsync(deviceDTO);
+            }
+
+            return true;
+        }
+
         private static SensorDTO MapToDeviceDTO(Sensor device)
         {
             return new SensorDTO
@@ -135,7 +144,8 @@ namespace SmartGuardHub.Features.DeviceManagement
                 RawResponse = device.RawResponse,
                 IsInInchingMode = device.IsInInchingMode,
                 InchingModeWidthInMs = device.InchingModeWidthInMs,
-                LatestValue = device.LatestValue
+                LatestValue = device.LatestValue,
+                LastTimeValueSet = device.LastTimeValueSet
             };
         }
         private static Sensor MapToDevice(SensorDTO deviceDto)
@@ -156,8 +166,25 @@ namespace SmartGuardHub.Features.DeviceManagement
                 RawResponse = deviceDto.RawResponse,
                 InchingModeWidthInMs = deviceDto.InchingModeWidthInMs,
                 IsInInchingMode = deviceDto.IsInInchingMode,
-                LatestValue = (string?)deviceDto.LatestValue
+                LatestValue = deviceDto.LatestValue.ToString(),
+                LastTimeValueSet = deviceDto.LastTimeValueSet
             };
+        }
+
+        private static List<SensorDTO_Mini> ToMini(IEnumerable<SensorDTO> sensors)
+        {
+            return sensors.Select(s => new SensorDTO_Mini
+            {
+                SensorId = s.SensorId,
+                UnitId = s.UnitId,
+                Name = s.Name,
+                Type = s.Type,
+                LastSeen = s.LastSeen,
+                IsInInchingMode = s.IsInInchingMode,
+                InchingModeWidthInMs = s.InchingModeWidthInMs,
+                LatestValue = s.LatestValue,
+                LastTimeValueSet = s.LastTimeValueSet
+            }).ToList();
         }
     }
 }

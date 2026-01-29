@@ -25,8 +25,6 @@ namespace SmartGuardHub.Features.UserCommands
             _userCommands = userCommands;
             _loggingService = loggingService;
 
-            Console.WriteLine("++++++++++++++++++++++++++++UserCommandHandler created, subscribing to MQTT.");
-
             _mqttService = mqttService;
             _scopeFactory = scopeFactory;
         }
@@ -60,21 +58,21 @@ namespace SmartGuardHub.Features.UserCommands
 
                     result.RequestId = jsonCommand.RequestId;
 
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Ack), result, retainFlag: false);
+                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Ack), result, retainFlag: false);
                 }
                 else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
                 {
 
                 }
 
-                if (result != null && result.State == DeviceResponseState.OK)
+                if (result != null && jsonCommand.CommandPayload != null && result.State == DeviceResponseState.OK)
                     UpdateTopic(jsonCommand.CommandPayload.InstalledSensorId, jsonCommand.JsonCommandType);
             }
             catch (Exception ex)
             {
                 result = new GeneralResponse { State = DeviceResponseState.Error, RequestId = "Failed to parse Json" };
 
-                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Ack), result, retainFlag: false);
+                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Ack), result, retainFlag: false);
             }
         }
 
@@ -101,11 +99,11 @@ namespace SmartGuardHub.Features.UserCommands
             switch (jsonCommandType)
             {
                 case JsonCommandType.TurnOn:
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.On }, retainFlag: true);
+                    //_mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.On }, retainFlag: true);
                     break;
 
                 case JsonCommandType.TurnOff:
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.Off }, retainFlag: true);
+                    //_mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.Off }, retainFlag: true);
                     break;
             }
         }

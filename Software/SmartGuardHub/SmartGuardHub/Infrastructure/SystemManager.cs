@@ -1,8 +1,11 @@
-﻿using System.Collections.Concurrent;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using SmartGuardHub.Features.DeviceManagement;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using SmartGuardHub.Features.DeviceManagement;
+using System.Text.Json;
 
 namespace SmartGuardHub.Infrastructure
 {
@@ -189,6 +192,15 @@ namespace SmartGuardHub.Infrastructure
                     File.Delete(tempPath);
             }
         }
+        public static string Serialize(object obj)
+        {
+            return JsonConvert.SerializeObject(
+                obj,
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                });
+        }
     }
 
     public class MqttTopics
@@ -196,7 +208,7 @@ namespace SmartGuardHub.Infrastructure
         /// <summary>
         /// Publish from Device, Subscribe from Mobile
         /// </summary>
-        public const string InstalledDevices = "InstalledDevices";
+        public const string InstalledUnits = "InstalledUnits";
 
 
         /// <summary>

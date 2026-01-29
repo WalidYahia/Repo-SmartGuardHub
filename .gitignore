@@ -1,12 +1,36 @@
+# Visual Studio / IDE
+.vs/
+.vscode/
+
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+*.pubxml.user
+
+# Design-time & cache
+**/.dtbcache.v2
+**/*.vsidx
+**/FileContentIndex/
+
+# .NET build outputs
+bin/
+obj/
+
+*.cache
+
+# Publish folders
+Publish/
+Publish-Net/
+publish/
+
+# Databases & local data
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 CodeChunks.db
-17.13.444.19527
+
+# Misc / temp
 EndpointInfo
-net8.0
-ProjectEvaluation
-/Software/SmartGuardHub/.vs/SmartGuardHub/DesignTimeBuild/.dtbcache.v2
-/Software/SmartGuardHub/.vs/SmartGuardHub/v17
-/Software/SmartGuardHub/.vs/SmartGuardHub/FileContentIndex/*.vsidx
-/Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite
-/Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite-shm
-/Software/SmartGuardHub/SmartGuardHub/Database/smartguardDb.sqlite-wal
-/Software/SmartGuardHub/SmartGuardHub/obj/*.cache
+17.13.444.19527

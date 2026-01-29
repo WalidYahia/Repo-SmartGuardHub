@@ -72,7 +72,11 @@ namespace SmartGuardHub.Protocols
             {
                 await _loggingService.LogErrorAsync(LogMessageKey.RestProtocol, $"Failed to send REST command {command} to device {destination}", ex);
 
-                return new GeneralResponse();
+                return new GeneralResponse
+                {
+                    State = DeviceResponseState.Error,
+                    DevicePayload = $"Error: {ex.Message}"
+                };
             }
         }
     }

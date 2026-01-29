@@ -59,7 +59,7 @@ namespace SmartGuardHub.Features.UserCommands
         protected async Task<GeneralResponse> GetInfoResponse(string installedDeviceUrl, ISystemUnit systemDevice, JsonCommandPayload jsonCommandPayload)
         {
             var command = systemDevice.GetInfoCommand(jsonCommandPayload.UnitId);
-            string jsonString = JsonConvert.SerializeObject(command);
+            string jsonString = SystemManager.Serialize(command);
             return await systemDevice.SendCommandAsync(installedDeviceUrl + systemDevice.InfoPath, jsonString);
         }
     }
