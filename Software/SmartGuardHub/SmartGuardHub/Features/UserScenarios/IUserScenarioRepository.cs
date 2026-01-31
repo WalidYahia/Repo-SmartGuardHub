@@ -6,7 +6,7 @@
         Task<List<UserScenario>> GetEnabledAsync();
         Task<UserScenario?> GetByIdAsync(string id);
 
-        Task SaveAsync(UserScenario scenario);
-        Task DeleteAsync(string id);
+        Task<bool> SaveAsync(UserScenario scenario);
+        Task<bool> DeleteAsync(string id);
     }
 }

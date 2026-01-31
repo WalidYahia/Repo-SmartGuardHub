@@ -33,6 +33,9 @@
             CreateDevice = 5,
             RenameDevice = 6,
             LoaddAllUnits = 7,
+
+            SaveUSerScenario = 10,
+            DeleteUSerScenario = 11,
         }
 
         public enum ScenarioCondition

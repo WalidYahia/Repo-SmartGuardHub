@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SmartGuardHub.Features.UserCommands;
 using SmartGuardHub.Features.UserScenarios;
+using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Network;
+using SmartGuardHub.Protocols.MQTT;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Controllers
 {
@@ -10,10 +14,12 @@ namespace SmartGuardHub.Controllers
     public class UserScenarioController : ControllerBase
     {
         private readonly IUserScenarioRepository _scenarioRepo;
+        private readonly IMqttService _mqttService;
 
-        public UserScenarioController(IUserScenarioRepository scenarioRepo)
+        public UserScenarioController(IUserScenarioRepository scenarioRepo, IMqttService mqttService)
         {
             _scenarioRepo = scenarioRepo;
+            _mqttService = mqttService;
         }
 
         [HttpPost("saveUserScenario")]
@@ -32,7 +38,14 @@ namespace SmartGuardHub.Controllers
             if (string.IsNullOrWhiteSpace(request.Id))
                 request.Id = Guid.NewGuid().ToString("N");
 
-            await _scenarioRepo.SaveAsync(request);
+            var result = await _scenarioRepo.SaveAsync(request);
+
+            if (result)
+            {
+                var scenarios = await _scenarioRepo.GetAllAsync();
+
+                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.UserScenarios), scenarios, retainFlag: true);
+            }
 
             return Ok(new
             {
@@ -47,6 +60,20 @@ namespace SmartGuardHub.Controllers
             var scenarios = await _scenarioRepo.GetAllAsync();
 
             return Ok(scenarios);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUserScenario(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+                return BadRequest("Scenario Id is required.");
+
+            var deleted = await _scenarioRepo.DeleteAsync(id);
+
+            if (!deleted)
+                return NotFound($"No scenario found with Id = {id}");
+
+            return Ok(new { Message = $"User scenario {id} deleted successfully" });
         }
     }
 }

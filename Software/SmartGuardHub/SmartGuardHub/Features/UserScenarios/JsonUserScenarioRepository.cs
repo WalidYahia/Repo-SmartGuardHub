@@ -45,7 +45,7 @@ namespace SmartGuardHub.Features.UserScenarios
             return all.FirstOrDefault(x => x.Id == id);
         }
 
-        public async Task SaveAsync(UserScenario scenario)
+        public async Task<bool> SaveAsync(UserScenario scenario)
         {
             await _lock.WaitAsync();
             try
@@ -59,14 +59,17 @@ namespace SmartGuardHub.Features.UserScenarios
                     all.Add(scenario);
 
                 await WriteFileAsync(all);
+
+                return true;
             }
+            catch { return false; }
             finally
             {
                 _lock.Release();
             }
         }
 
-        public async Task DeleteAsync(string id)
+        public async Task<bool> DeleteAsync(string id)
         {
             await _lock.WaitAsync();
             try
@@ -74,7 +77,10 @@ namespace SmartGuardHub.Features.UserScenarios
                 var all = await ReadFileAsync();
                 all.RemoveAll(x => x.Id == id);
                 await WriteFileAsync(all);
+
+                return true;
             }
+            catch { return false; }
             finally
             {
                 _lock.Release();

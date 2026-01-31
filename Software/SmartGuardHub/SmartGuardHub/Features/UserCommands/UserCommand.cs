@@ -2,6 +2,7 @@
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
+using SmartGuardHub.Features.UserScenarios;
 using SmartGuardHub.Infrastructure;
 using static SmartGuardHub.Infrastructure.Enums;
 
@@ -87,6 +88,8 @@ namespace SmartGuardHub.Features.UserCommands
         public UnitType DeviceType { get; set; } = UnitType.Unknown;
         public string? Name { get; set; }
         public int InchingTimeInMs { get; set; }
+
+        public UserScenario UserScenario { get; set; }
     }
 
     public class UnitMqttPayload

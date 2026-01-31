@@ -201,6 +201,16 @@ namespace SmartGuardHub.Infrastructure
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 });
         }
+
+        public static T Deserialize<T>(string json)
+        {
+            return JsonConvert.DeserializeObject<T>(
+                json,
+                new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                });
+        }
     }
 
     public class MqttTopics
@@ -235,5 +245,10 @@ namespace SmartGuardHub.Infrastructure
         /// Publish from Device, Subscribe from Cloud
         /// </summary>
         public const string RemoteUpdateTopic_Ack = "RemoteUpdate_Ack";
+
+        /// <summary>
+        /// Publish from Device, Subscribe from Mobile
+        /// </summary>
+        public const string UserScenarios = "UserScenarios";
     }
 }
