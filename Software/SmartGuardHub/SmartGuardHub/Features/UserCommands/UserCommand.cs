@@ -89,7 +89,7 @@ namespace SmartGuardHub.Features.UserCommands
         public string? Name { get; set; }
         public int InchingTimeInMs { get; set; }
 
-        public UserScenario UserScenario { get; set; }
+        public UserScenario? UserScenario { get; set; }
     }
 
     public class UnitMqttPayload

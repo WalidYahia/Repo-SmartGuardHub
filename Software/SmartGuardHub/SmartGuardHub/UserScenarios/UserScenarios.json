@@ -1,31 +1,17 @@
 [
   {
-    "Id": "1",
-    "Name": "Evening Light",
-    "IsEnabled": false,
-    "TargetSensorId": "10016ca843_0",
-    "Action": 0,
-    "LogicOfConditions": "And",
-    "Conditions": [
-      {
-        "Condition": 0,
-        "Time": "19:00:00",
-        "DurationInSeconds": 30,
-        "SensorsDependency": []
-      }
-    ]
-  },
-  {
     "Id": "2",
     "Name": "Morning",
-    "IsEnabled": true,
+    "IsEnabled": false,
     "TargetSensorId": "10016ca843_0",
-    "Action": 0,
+    "Action": "On",
     "LogicOfConditions": "And",
     "Conditions": [
       {
-        "Condition": 1,
-        "Time": "07:00:00"
+        "Condition": "OnTime",
+        "DurationInSeconds": 50,
+        "Time": "11:08:00",
+        "SensorsDependency": null
       }
     ]
   },
@@ -34,41 +20,41 @@
     "Name": "Night",
     "IsEnabled": true,
     "TargetSensorId": "10016ca843_0",
-    "Action": 1,
+    "Action": "On",
     "LogicOfConditions": "And",
     "Conditions": [
       {
-        "Condition": 1,
-        "Time": "17:30:00"
+        "Condition": "OnTime",
+        "DurationInSeconds": 0,
+        "Time": "17:30:00",
+        "SensorsDependency": null
       }
     ]
   },
   {
-    "Id": "4",
-    "Name": "Evening Light",
+    "Id": "e1273052-07d5-4d74-8236-398a2a576574",
+    "Name": "neesh led day mode",
     "IsEnabled": false,
     "TargetSensorId": "10016ca843_0",
-    "Action": 1,
+    "Action": "On",
     "LogicOfConditions": "And",
     "Conditions": [
       {
-        "Condition": 1,
-        "Time": "09:17:00"
+        "Condition": "OnTime",
+        "DurationInSeconds": 0,
+        "Time": "10:37:00",
+        "SensorsDependency": null
       },
       {
-        "Condition": 2,
+        "Condition": "OnOtherSensorValue",
+        "DurationInSeconds": 0,
+        "Time": "00:00:00",
         "SensorsDependency": [
           {
             "SensorId": "10016ca843_1",
-            "SensorType": 0,
+            "SensorType": "SonoffMiniR3",
             "Value": "1",
-            "Operator": "0"
-          },
-          {
-            "SensorId": "10016ca843_2",
-            "SensorType": 0,
-            "Value": "0",
-            "Operator": "0"
+            "Operator": "Equals"
           }
         ]
       }

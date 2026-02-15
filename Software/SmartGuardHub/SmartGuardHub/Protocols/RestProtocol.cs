@@ -24,6 +24,8 @@ namespace SmartGuardHub.Protocols
         {
             try
             {
+                //destination = "http://192.168.1.8:8081/zeroconf/info";
+
                 // For Sonoff devices in DIY mode, typically REST API on port 8081
                 // $"http://{hostName}:8081/zeroconf/switches";
 
@@ -70,6 +72,8 @@ namespace SmartGuardHub.Protocols
             }
             catch (Exception ex)
             {
+                Console.WriteLine("******************************* " + ex.ToString());
+
                 await _loggingService.LogErrorAsync(LogMessageKey.RestProtocol, $"Failed to send REST command {command} to device {destination}", ex);
 
                 return new GeneralResponse

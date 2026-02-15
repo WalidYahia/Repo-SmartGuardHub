@@ -42,6 +42,9 @@ namespace SmartGuardHub.Features.DeviceManagement
                 return BadRequest("Request body is empty.");
             }
 
+            if(jsonCommand.JsonCommandType == JsonCommandType.Ping)
+                return Ok();
+
             try
             {
                 var result = await _userCommandHandler.HandleApiUserCommand(jsonCommand);

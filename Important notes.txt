@@ -1,0 +1,6 @@
+* To enable pi to resolve the MINIR3 hostname:
+	I have changed (/etc/resolv.conf) by remove (nameserver 8.8.8.8, nameserver 8.8.4.4) and add (nameserver 192.168.1.1)
+
+https://chatgpt.com/share/698f7db2-c4b8-800e-8032-e2fb01cbbff5
+
+-------------------------------------------------------------------------------------------------------------

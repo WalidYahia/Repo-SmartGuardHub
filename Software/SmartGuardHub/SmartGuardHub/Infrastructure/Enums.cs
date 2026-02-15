@@ -34,8 +34,11 @@
             RenameDevice = 6,
             LoaddAllUnits = 7,
 
+
             SaveUSerScenario = 10,
             DeleteUSerScenario = 11,
+
+            Ping = -1,
         }
 
         public enum ScenarioCondition

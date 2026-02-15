@@ -16,7 +16,7 @@ namespace SmartGuardHub.Features.UserCommands
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)
         {
-            await _deviceService.RefreshDevices();
+            //await _deviceService.RefreshDevices();
 
             return new GeneralResponse
             {

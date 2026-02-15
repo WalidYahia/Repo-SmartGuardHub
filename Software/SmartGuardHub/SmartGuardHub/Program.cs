@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SmartGuardHub.Application;
 using SmartGuardHub.Configuration;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
@@ -44,16 +45,16 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-//// Configure CORS for mobile app access
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowMobileApp", policy =>
-//    {
-//        policy.AllowAnyOrigin()
-//              .AllowAnyMethod()
-//              .AllowAnyHeader();
-//    });
-//});
+// Configure CORS for mobile app access
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowMobileApp", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 
 builder.Services.AddScoped<DeviceService>();
@@ -67,6 +68,8 @@ builder.Services.AddHostedService<LogCleanupService>();
 builder.Services.AddHostedService<DevicesScanner>();
 
 builder.Services.AddHostedService<UserScenarioWorker>();
+
+//builder.Services.AddHostedService<ApplicationStartupService>();
 
 builder.Services.AddSingleton<ConfigurationService>();
 
@@ -103,10 +106,6 @@ builder.Services.AddMqttService(); // Add this line
 builder.Services.AddSingleton<MqttMessageListener>(); // runs once for app lifetime
 
 
-
-
-
-
 // Logging
 builder.Services.AddLogging(logging =>
 {
@@ -117,11 +116,9 @@ builder.Services.AddLogging(logging =>
 
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(5000); // HTTP
-    //options.ListenAnyIP(5001, listenOptions =>
-    //{
-    //    listenOptions.UseHttps(); // HTTPS if you configured a cert
-    //});
+    options.ListenAnyIP(5000); // HTTP - accessible from network
+
+    options.AddServerHeader = false;
 });
 
 
@@ -134,58 +131,45 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Initialize everything BEFORE starting the app
 await SystemManager.InitSystemEnvironment();
 
-// Ensure database folder exists
 var dbPath = Path.Combine(AppContext.BaseDirectory, "Database", "Production");
 if (!Directory.Exists(dbPath))
 {
     Directory.CreateDirectory(dbPath);
-    Console.WriteLine($"********************* Created missing database folder: {dbPath}");
+    Console.WriteLine($"Created missing database folder: {dbPath}");
 }
 
-// Ensure database is created
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<SmartGuardDbContext>();
-    context.Database.Migrate(); // Apply migrations
-    DatabaseSeeder.SeedData(context); // Add seed data
+    await context.Database.MigrateAsync();
+    DatabaseSeeder.SeedData(context);
 }
 
-// Ensure database is created
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<SystemLogDbContext>();
-    context.Database.Migrate(); // Apply migrations
+    await context.Database.MigrateAsync();
 }
 
-// Start MQTT service
 var mqttService = app.Services.GetRequiredService<IMqttService>();
 await mqttService.StartAsync();
 
-// force resolve at startup
 using (var scope = app.Services.CreateScope())
 {
     var handler = scope.ServiceProvider.GetRequiredService<MqttMessageListener>();
 }
 
-// Call async initialization before app starts handling requests
 using (var scope = app.Services.CreateScope())
 {
     var initializer = scope.ServiceProvider.GetRequiredService<IAsyncInitializer>();
     await initializer.InitializeAsync();
 }
 
-Console.WriteLine($"********************* app.UseHttpsRedirection(): {dbPath}");
-
-//// Enable CORS before other middleware
-//app.UseCors("AllowMobileApp");
-
-//// Only use HTTPS redirection in production
-//if (!app.Environment.IsDevelopment())
-//{
-//    app.UseHttpsRedirection();
-//}
+// Enable CORS before other middleware
+app.UseCors("AllowMobileApp");
 
 app.UseAuthorization();
 

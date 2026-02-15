@@ -20,7 +20,7 @@ namespace SmartGuardHub.Features.UserScenarios
         public ScenarioCondition Condition { get; set; }
         public int DurationInSeconds { get; set; }
         public TimeSpan Time { get; set; }
-        public List<UserScenarioSensor> SensorsDependency { get; set; }
+        public List<UserScenarioSensor>? SensorsDependency { get; set; }
     }
 
     public class UserScenarioSensor
