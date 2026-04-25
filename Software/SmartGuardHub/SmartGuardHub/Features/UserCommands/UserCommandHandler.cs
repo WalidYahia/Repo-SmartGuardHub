@@ -116,7 +116,7 @@ namespace SmartGuardHub.Features.UserCommands
                 {
                     saveState = await _scenarioRepo.DeleteAsync(jsonCommand.CommandPayload.UserScenario.Id);
                 }
-
+                
                 if (saveState)
                 {
                     result = new GeneralResponse { State = DeviceResponseState.OK };
