@@ -8,6 +8,7 @@ using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols.MQTT;
 using System.Text;
 using System.Text.Json;
+using static SmartGuardHub.Infrastructure.Enums;
 using LogLevel = SmartGuardHub.Features.Logging.LogLevel;
 
 namespace SmartGuardHub.Protocols.MQTT
@@ -195,8 +196,9 @@ namespace SmartGuardHub.Protocols.MQTT
             Console.WriteLine("MQTT client connected");
 
             // Subscribe to all topics
-            await SubscribeAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteUpdateTopic_Publish));
-            await SubscribeAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Publish));
+            await SubscribeAsync(SystemManager.GetMqttTopic(MqttTopics.CloudSensorConfig));
+            await SubscribeAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteUpdate));
+            await SubscribeAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction));
 
             await Task.CompletedTask;
         }

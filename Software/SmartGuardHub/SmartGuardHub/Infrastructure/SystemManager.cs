@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Infrastructure
 {
@@ -38,11 +39,6 @@ namespace SmartGuardHub.Infrastructure
             }
 
             return string.Join(" --> ", messages) + Environment.NewLine + last.StackTrace;
-        }
-
-        public static string GetMqttTopicPath(string topicName)
-        {
-            return DeviceId + "/" + topicName;
         }
 
         public static async Task InitSystemEnvironment()
@@ -211,44 +207,10 @@ namespace SmartGuardHub.Infrastructure
                     ContractResolver = new CamelCasePropertyNamesContractResolver()
                 });
         }
-    }
 
-    public class MqttTopics
-    {
-        /// <summary>
-        /// Publish from Device, Subscribe from Mobile
-        /// </summary>
-        public const string InstalledUnits = "InstalledUnits";
-
-
-        /// <summary>
-        /// Publish from Device, Subscribe from Mobile
-        /// </summary>
-        public const string DeviceDataTopic = "DeviceData";
-
-        /// <summary>
-        /// Publish from Mobile, Subscribe from Device
-        /// </summary>
-        public const string RemoteActionTopic_Publish = "RemoteAction";
-
-        /// <summary>
-        /// Publish from Device, Subscribe from Mobile
-        /// </summary>
-        public const string RemoteActionTopic_Ack = "RemoteAction_Ack";
-
-        /// <summary>
-        /// Publish from Cloud, Subscribe from Device
-        /// </summary>
-        public const string RemoteUpdateTopic_Publish = "RemoteUpdate";
-
-        /// <summary>
-        /// Publish from Device, Subscribe from Cloud
-        /// </summary>
-        public const string RemoteUpdateTopic_Ack = "RemoteUpdate_Ack";
-
-        /// <summary>
-        /// Publish from Device, Subscribe from Mobile
-        /// </summary>
-        public const string UserScenarios = "UserScenarios";
+        public static string GetMqttTopic(MqttTopics mqttTopics)
+        {
+            return $"Syncro/{DeviceId}/{mqttTopics.ToString()}";
+        }
     }
 }

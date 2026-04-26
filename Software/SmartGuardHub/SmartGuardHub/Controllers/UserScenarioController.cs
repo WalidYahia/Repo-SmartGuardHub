@@ -44,7 +44,7 @@ namespace SmartGuardHub.Controllers
             {
                 var scenarios = await _scenarioRepo.GetAllAsync();
 
-                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.UserScenarios), scenarios, retainFlag: true);
+                _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.UserScenario), scenarios, retainFlag: true);
             }
 
             return Ok(new

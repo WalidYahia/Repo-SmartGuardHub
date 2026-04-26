@@ -59,7 +59,7 @@ namespace SmartGuardHub.Features.UserCommands
                     result = await HandleNullCommand();
                 }
 
-                if (recievedModel.Topic.Contains(MqttTopics.RemoteActionTopic_Publish))
+                if (recievedModel.Topic.Contains(MqttTopics.RemoteAction.ToString()))
                 {
                     switch (jsonCommand.JsonCommandType)
                     {
@@ -75,9 +75,9 @@ namespace SmartGuardHub.Features.UserCommands
                             break;
                     }
 
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Ack), result, retainFlag: false);
+                    _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction_Ack), result, retainFlag: false);
                 }
-                else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdateTopic_Publish))
+                else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdate.ToString()))
                 {
 
                 }
@@ -89,7 +89,7 @@ namespace SmartGuardHub.Features.UserCommands
             {
                 result = new GeneralResponse { State = DeviceResponseState.Error, RequestId = "Failed to parse Json" };
 
-                _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.RemoteActionTopic_Ack), result, retainFlag: false);
+                _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction_Ack), result, retainFlag: false);
             }
         }
 
@@ -123,7 +123,7 @@ namespace SmartGuardHub.Features.UserCommands
                     
                     var scenarios = await _scenarioRepo.GetAllAsync();
 
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.UserScenarios), scenarios, retainFlag: true);
+                    _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.UserScenario), scenarios, retainFlag: true);
                 }
                 else
                     result = new GeneralResponse { State = DeviceResponseState.Error };

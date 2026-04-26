@@ -30,7 +30,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         {
             SystemManager.InstalledSensors = new (await GetAllDevicesAsync());
 
-            _mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.InstalledUnits), ToMini(SystemManager.InstalledSensors), true);
+            _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.DeviceSensorConfig), ToMini(SystemManager.InstalledSensors), true);
 
             _logger.LogInformation("Refreshed devices. Total devices: {Count}", SystemManager.InstalledSensors.Count);
         }

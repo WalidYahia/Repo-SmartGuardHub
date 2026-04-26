@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SmartGuardHub.Application;
+using SmartGuardHub.Cloud;
 using SmartGuardHub.Configuration;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
@@ -75,10 +76,17 @@ builder.Services.AddSingleton<ConfigurationService>();
 
 builder.Services.AddScoped<NetworkConfigurationManager>();
 
-// HTTP Client for REST protocol
+// HTTP Client for local device REST protocol (Sonoff units)
 builder.Services.AddHttpClient<IDeviceProtocol, RestProtocol>(client =>
 {
     client.Timeout = TimeSpan.FromSeconds(10);
+});
+
+// HTTP Client for SyncroCloud API communication
+builder.Services.AddHttpClient<ISyncroCloudService, SyncroCloudService>(client =>
+{
+    client.BaseAddress = new Uri(builder.Configuration["SyncroCloud:BaseUrl"] ?? "http://localhost:5001/");
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
 // user command handler
