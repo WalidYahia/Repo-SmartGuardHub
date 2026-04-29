@@ -1,4 +1,3 @@
-﻿using Newtonsoft.Json;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
@@ -16,26 +15,16 @@ namespace SmartGuardHub.Features.UserCommands
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)
         {
-            var installedDevice = await LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
+            var sensor = LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
 
-            if (installedDevice != null)
+            if (sensor != null)
             {
-                var systemDevice = await LoadSystemUnit(installedDevice.Type);
-
-                GeneralResponse infoResponse = await GetInfoResponse(installedDevice.Url, systemDevice, jsonCommand.CommandPayload);
-
-                return infoResponse;
+                var systemDevice = await LoadSystemUnit(sensor.UnitType);
+                return await GetInfoResponse(sensor.Url, systemDevice, jsonCommand.CommandPayload);
             }
-            else
-            {
-                await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {jsonCommand.CommandPayload.InstalledSensorId} not found.");
 
-                return new GeneralResponse
-                {
-                    State = DeviceResponseState.NotFound,
-                    DevicePayload = "Device not found"
-                };
-            }
+            await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"GetInfo - Sensor {jsonCommand.CommandPayload.InstalledSensorId} not found.");
+            return new GeneralResponse { State = DeviceResponseState.NotFound, DevicePayload = "Device not found" };
         }
     }
 }

@@ -69,6 +69,21 @@ namespace SmartGuardHub.Features.UserScenarios
             }
         }
 
+        public async Task<bool> SaveAllAsync(List<UserScenario> scenarios)
+        {
+            await _lock.WaitAsync();
+            try
+            {
+                await WriteFileAsync(scenarios);
+                return true;
+            }
+            catch { return false; }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
         public async Task<bool> DeleteAsync(string id)
         {
             await _lock.WaitAsync();

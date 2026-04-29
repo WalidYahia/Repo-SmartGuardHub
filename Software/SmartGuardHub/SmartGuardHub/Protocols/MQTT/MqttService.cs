@@ -197,6 +197,7 @@ namespace SmartGuardHub.Protocols.MQTT
 
             // Subscribe to all topics
             await SubscribeAsync(SystemManager.GetMqttTopic(MqttTopics.CloudSensorConfig));
+            await SubscribeAsync(SystemManager.GetMqttTopic(MqttTopics.CloudUserScenario));
             await SubscribeAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteUpdate));
             await SubscribeAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction));
 

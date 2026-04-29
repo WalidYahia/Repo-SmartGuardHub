@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
-using SmartGuardHub.Features.Logging;
+﻿using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.DeviceManagement
 {
@@ -16,11 +16,11 @@ namespace SmartGuardHub.Features.DeviceManagement
             _protocols = protocols;
         }
 
-        public async Task<GeneralResponse> SendCommandAsync(SensorDTO device, string destination, string command, object? parameters = null)
+        public async Task<GeneralResponse> SendCommandAsync(SensorConfiguration.SensorConfig device, string destination, string command, object? parameters = null)
         {
-            var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == device.Protocol);
+            var protocol = _protocols.FirstOrDefault(p => p.ProtocolType == (UnitProtocolType)device.Protocol);
 
-            var systemDevice = _systemUnits.FirstOrDefault(d => d.DeviceType == device.Type);
+            var systemDevice = _systemUnits.FirstOrDefault(d => d.UnitType == device.UnitType);
 
             var result = await protocol.SendCommandAsync(destination, command, parameters);
 

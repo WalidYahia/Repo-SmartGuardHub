@@ -1,0 +1,28 @@
+[
+  {
+    "Id": "SmartGuard-WALID_Swich_SonoffMiniR3_10016ca843_Switch2_address_port",
+    "DeviceId": "SmartGuard-WALID",
+    "SensorId": "6c313d04-e858-49bc-9379-bc7eb7852a2b",
+    "SwitchNo": 1,
+    "UnitId": "10016ca843",
+    "Address": null,
+    "Port": null,
+    "DisplayName": "Neesh-Led",
+    "Url": "http://eWeLink_10016ca843:8081",
+    "UnitType": "SonoffMiniR3",
+    "SensorType": 0,
+    "Protocol": 0,
+    "SyncPeriodicity": 5,
+    "EventChangeSync": true,
+    "EventChangeDelta": 1,
+    "InstalledAt": "2026-04-28T04:10:52.888105Z",
+    "IsActive": true,
+    "Notes": null,
+    "LastReading": "1",
+    "IsOnline": true,
+    "LastSeen": "2026-04-28T08:43:59.9102553+03:00",
+    "IsInInchingMode": true,
+    "InchingModeWidthInMs": 9000,
+    "LastTimeValueSet": "2026-04-28T08:38:35.5806726+03:00"
+  }
+]

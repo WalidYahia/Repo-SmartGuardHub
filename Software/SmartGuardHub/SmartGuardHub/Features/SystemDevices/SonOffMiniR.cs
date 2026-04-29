@@ -1,4 +1,4 @@
-﻿using SmartGuardHub.Features.DeviceManagement;
+﻿using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
@@ -18,7 +18,8 @@ namespace SmartGuardHub.Features.SystemDevices
             _protocols = protocols;
         }
 
-        public UnitType DeviceType => UnitType.SonoffMiniR3;
+        public UnitType UnitType => UnitType.SonoffMiniR3;
+        public SensorType SensorType => SensorType.Swich;
         public UnitProtocolType ProtocolType => UnitProtocolType.Rest;
         public string BaseUrl => "http://eWeLink_";
         public string PortNo => "8081";
@@ -175,48 +176,45 @@ namespace SmartGuardHub.Features.SystemDevices
                 return result;
         }
 
-        public async Task<SensorDTO> MapRawInfoResponseToSensorDto(dynamic rawInfoResponse, SensorDTO sensorDTO)
+        public async Task<SensorConfig> MapRawInfoResponseToSensorConfig(object rawInfoResponse, SensorConfig sensor)
         {
-            SonoffMiniRResponsePayload unitResponse = rawInfoResponse as SonoffMiniRResponsePayload;
-
-            SensorDTO newSensorDTO = new SensorDTO();
+            var unitResponse = rawInfoResponse as SonoffMiniRResponsePayload;
+            var result = ShallowCopy(sensor);
 
             if (unitResponse != null)
             {
-                newSensorDTO.SensorId = sensorDTO.SensorId;
-                newSensorDTO.Name = sensorDTO.Name;
-                newSensorDTO.Type = sensorDTO.Type;
-                newSensorDTO.LatestValue = Enum.TryParse<SwitchOutletStatus>(unitResponse.Data.Switches.FirstOrDefault(o => o.Outlet == (int)sensorDTO.SwitchNo)?.Switch, true, out var status) ?
-                                            newSensorDTO.LatestValue = ((int)status).ToString()
-                                            : newSensorDTO.LatestValue = ((int)SwitchOutletStatus.Off).ToString();
+                var switchOutlet = (SwitchOutlet)sensor.SwitchNo;
 
-                var inschingData = unitResponse.Data.Pulses.FirstOrDefault(o => o.Outlet == sensorDTO.SwitchNo);
+                var latestValue = Enum.TryParse<SwitchOutletStatus>(
+                    unitResponse.Data.Switches.FirstOrDefault(o => o.Outlet == (int)switchOutlet)?.Switch, true, out var status)
+                    ? ((int)status).ToString()
+                    : ((int)SwitchOutletStatus.Off).ToString();
 
-                newSensorDTO.IsInInchingMode = (inschingData?.Switch == "on" && inschingData.Pulse == "on") ? true : false;
-                newSensorDTO.InchingModeWidthInMs = inschingData?.Width ?? 0;
+                var inchingData = unitResponse.Data.Pulses.FirstOrDefault(o => o.Outlet == switchOutlet);
 
-                newSensorDTO.CreatedAt = sensorDTO.CreatedAt;
-                newSensorDTO.SwitchNo = sensorDTO.SwitchNo;
-                newSensorDTO.FwVersion = sensorDTO.FwVersion;
-                newSensorDTO.IsOnline = sensorDTO.IsOnline;
-                newSensorDTO.Protocol = sensorDTO.Protocol;
-                newSensorDTO.UnitId = sensorDTO.UnitId;
-                newSensorDTO.Url = sensorDTO.Url;
-                newSensorDTO.RawResponse = sensorDTO.RawResponse;
-                newSensorDTO.LastTimeValueSet = sensorDTO.LastTimeValueSet;
-
-                if (newSensorDTO.LatestValue != sensorDTO.LatestValue)
-                {
-                    newSensorDTO.LastSeen = DateTime.Now;
-                    newSensorDTO.LastTimeValueSet = DateTime.Now;
-                }
-                else
-                {
-                    newSensorDTO.LastSeen = sensorDTO.LastSeen;
-                }
+                result.IsOnline           = true;
+                result.IsInInchingMode    = inchingData?.Switch == "on" && inchingData.Pulse == "on";
+                result.InchingModeWidthInMs = inchingData?.Width ?? 0;
+                result.LastTimeValueSet   = latestValue != sensor.LastReading ? DateTime.Now : sensor.LastTimeValueSet;
+                result.LastSeen           = DateTime.Now;
+                result.LastReading        = latestValue;
             }
 
-            return newSensorDTO;
+            return result;
         }
+
+        private static SensorConfig ShallowCopy(SensorConfig s) => new SensorConfig
+        {
+            Id = s.Id, DeviceId = s.DeviceId, SensorId = s.SensorId,
+            SwitchNo = s.SwitchNo, UnitId = s.UnitId, Address = s.Address, Port = s.Port,
+            DisplayName = s.DisplayName, Url = s.Url, UnitType = s.UnitType,
+            SensorType = s.SensorType, Protocol = s.Protocol,
+            SyncPeriodicity = s.SyncPeriodicity, EventChangeSync = s.EventChangeSync,
+            EventChangeDelta = s.EventChangeDelta, InstalledAt = s.InstalledAt,
+            IsActive = s.IsActive, Notes = s.Notes,
+            LastReading = s.LastReading, IsOnline = s.IsOnline,
+            LastSeen = s.LastSeen, IsInInchingMode = s.IsInInchingMode,
+            InchingModeWidthInMs = s.InchingModeWidthInMs, LastTimeValueSet = s.LastTimeValueSet
+        };
     }
 }

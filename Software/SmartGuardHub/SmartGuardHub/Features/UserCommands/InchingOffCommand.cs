@@ -1,8 +1,8 @@
-﻿using Newtonsoft.Json;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
+using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.UserCommands
 {
@@ -16,44 +16,34 @@ namespace SmartGuardHub.Features.UserCommands
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)
         {
-            var installedDevice = await LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
+            var sensor = LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
 
-            if (installedDevice != null)
+            if (sensor != null)
             {
-                var systemDevice = await LoadSystemUnit(installedDevice.Type);
+                var systemDevice = await LoadSystemUnit(sensor.UnitType);
+                var infoResponse = await GetInfoResponse(sensor.Url, systemDevice, jsonCommand.CommandPayload);
+                var inchingCommand = systemDevice.GetOffInchingCommand(sensor.UnitId, (SwitchOutlet)sensor.SwitchNo,
+                    (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
 
-                GeneralResponse infoResponse = await GetInfoResponse(installedDevice.Url, systemDevice, jsonCommand.CommandPayload);
-
-                var inchingCommand = systemDevice.GetOffInchingCommand(installedDevice.UnitId, installedDevice.SwitchNo, (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
-
-                string jsonString = SystemManager.Serialize(inchingCommand);
-
-                GeneralResponse result = await systemDevice.SendCommandAsync(installedDevice.Url + systemDevice.InchingPath, jsonString);
+                var result = await systemDevice.SendCommandAsync(sensor.Url + systemDevice.InchingPath, SystemManager.Serialize(inchingCommand));
 
                 if (result.State == DeviceResponseState.OK)
                 {
-                    installedDevice.IsInInchingMode = false;
-                    installedDevice.InchingModeWidthInMs = 0;
-                    installedDevice.LastSeen = DateTime.Now;
+                    sensor.IsInInchingMode    = false;
+                    sensor.InchingModeWidthInMs = 0;
+                    sensor.LastSeen           = DateTime.Now;
 
-                    result.DevicePayload = installedDevice;
+                    result.DevicePayload = sensor;
 
-                    _deviceService.UpdateDeviceAsync(installedDevice);
+                    _deviceService.UpdateDeviceAsync(sensor);
                     _deviceService.RefreshDevices();
                 }
 
                 return result;
             }
-            else
-            {
-                await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {jsonCommand.CommandPayload.UnitId}-{(int)jsonCommand.CommandPayload.SwitchNo} not found.");
 
-                return new GeneralResponse
-                {
-                    State = DeviceResponseState.NotFound,
-                    DevicePayload = "Device not found"
-                };
-            }
+            await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"InchingOff - Sensor {jsonCommand.CommandPayload.InstalledSensorId} not found.");
+            return new GeneralResponse { State = DeviceResponseState.NotFound, DevicePayload = "Device not found" };
         }
     }
 }

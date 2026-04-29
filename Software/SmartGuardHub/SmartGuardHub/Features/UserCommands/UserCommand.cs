@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using SmartGuardHub.Features.DeviceManagement;
+﻿using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
+using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.UserScenarios;
 using SmartGuardHub.Infrastructure;
@@ -45,15 +45,12 @@ namespace SmartGuardHub.Features.UserCommands
             return jsonCommand.CommandPayload == null ? false : true;
         }
 
-        protected async Task<SensorDTO> LoadInstalledSensor(string installedDeviceId)
-        {
-            var device = SystemManager.InstalledSensors.FirstOrDefault(d => d.SensorId == installedDeviceId);
+        protected SensorConfig? LoadInstalledSensor(string installedDeviceId) =>
+            SystemManager.InstalledSensors.FirstOrDefault(d => d.Id == installedDeviceId);
 
-            return device;
-        }
         protected async Task<ISystemUnit> LoadSystemUnit(UnitType deviceType)
         {
-            var systemDevice = _systemUnits.FirstOrDefault(d => d.DeviceType == deviceType);
+            var systemDevice = _systemUnits.FirstOrDefault(d => d.UnitType == deviceType);
 
             return systemDevice;
         }
@@ -83,9 +80,11 @@ namespace SmartGuardHub.Features.UserCommands
     {
         public string? UnitId { get; set; }
         public SwitchOutlet SwitchNo { get; set; }
+        public int? Address { get; set; }
+        public int? Port { get; set; }
         public string? InstalledSensorId { get; set; }
 
-        public UnitType DeviceType { get; set; } = UnitType.Unknown;
+        public UnitType UnitType { get; set; } = UnitType.Unknown;
         public string? Name { get; set; }
         public int InchingTimeInMs { get; set; }
 

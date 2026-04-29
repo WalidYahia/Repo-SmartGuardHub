@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Serialization;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
+using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.UserScenarios;
 using SmartGuardHub.Infrastructure;
@@ -20,12 +21,14 @@ namespace SmartGuardHub.Features.UserCommands
         private readonly IMqttService _mqttService;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IUserScenarioRepository _scenarioRepo;
+        private readonly ISensorConfigRepository _sensorConfigRepo;
 
         public UserCommandHandler(IEnumerable<UserCommand> userCommands,
             LoggingService loggingService,
             IMqttService mqttService,
             IServiceScopeFactory scopeFactory,
-            IUserScenarioRepository userScenarioRepository)
+            IUserScenarioRepository userScenarioRepository,
+            ISensorConfigRepository sensorConfigRepository)
         {
             _userCommands = userCommands;
             _loggingService = loggingService;
@@ -34,6 +37,7 @@ namespace SmartGuardHub.Features.UserCommands
             _scopeFactory = scopeFactory;
 
             _scenarioRepo = userScenarioRepository;
+            _sensorConfigRepo = sensorConfigRepository;
         }
 
         public async Task<GeneralResponse> HandleApiUserCommand(JsonCommand jsonCommand)
@@ -52,6 +56,18 @@ namespace SmartGuardHub.Features.UserCommands
 
             try
             {
+                if (recievedModel.Topic.Contains(MqttTopics.CloudSensorConfig.ToString()))
+                {
+                    await HandleCloudSensorConfigAsync(recievedModel.Payload);
+                    return;
+                }
+
+                if (recievedModel.Topic.Contains(MqttTopics.CloudUserScenario.ToString()))
+                {
+                    await HandleCloudUserScenarioAsync(recievedModel.Payload);
+                    return;
+                }
+
                 var jsonCommand = SystemManager.Deserialize<JsonCommand>(recievedModel.Payload);
 
                 if (jsonCommand == null)
@@ -145,6 +161,38 @@ namespace SmartGuardHub.Features.UserCommands
                 State = DeviceResponseState.NoContent,
                 DevicePayload = "NoContent"
             };
+        }
+
+        private async Task HandleCloudSensorConfigAsync(string payload)
+        {
+            var configs = SystemManager.Deserialize<List<SensorConfig>>(payload);
+
+            if (configs == null)
+            {
+                await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, "CloudSensorConfig - payload is null or invalid");
+                return;
+            }
+
+            var saved = await _sensorConfigRepo.SaveAllAsync(configs);
+
+            if (!saved)
+                await _loggingService.LogErrorAsync(LogMessageKey.UserCommandHandler, "CloudSensorConfig - failed to save config", null);
+        }
+
+        private async Task HandleCloudUserScenarioAsync(string payload)
+        {
+            var scenarios = SystemManager.Deserialize<List<UserScenario>>(payload);
+
+            if (scenarios == null)
+            {
+                await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, "CloudUserScenario - payload is null or invalid");
+                return;
+            }
+
+            var saved = await _scenarioRepo.SaveAllAsync(scenarios);
+
+            if (!saved)
+                await _loggingService.LogErrorAsync(LogMessageKey.UserCommandHandler, "CloudUserScenario - failed to save scenarios", null);
         }
 
         private async Task UpdateTopic(string sensorId, JsonCommandType jsonCommandType)

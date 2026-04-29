@@ -18,6 +18,35 @@
             Fourth = 3,
         }
 
+        // Matches cloud SwitchNo enum — used for deterministic ID generation
+        public enum SwitchNo
+        {
+            Non     = -1,
+            Switch1 =  0,
+            Switch2 =  1,
+            Switch3 =  2,
+            Switch4 =  3,
+            Switch5 =  4,
+            Switch6 =  5,
+            Switch7 =  6,
+            Switch8 =  7,
+        }
+
+        // Matches cloud SensorType enum — used for deterministic ID generation
+        public enum SensorType
+        {
+            Swich       = 0,
+            Temperature = 1,
+            Humidity    = 2,
+            Pressure    = 3,
+            Motion      = 4,
+            Gas         = 5,
+            Light       = 6,
+            Vibration   = 7,
+            Current     = 8,
+            Voltage     = 9,
+        }
+
         public enum SwitchOutletStatus
         {
             Off = 0,

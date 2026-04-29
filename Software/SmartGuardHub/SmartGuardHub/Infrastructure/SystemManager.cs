@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Features.SensorConfiguration;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -17,7 +17,7 @@ namespace SmartGuardHub.Infrastructure
         public static bool IsRaspberryPi { get; set; }
 
         //public List<DeviceDTO> Devices = new List<DeviceDTO>();
-        public static ConcurrentBag<SensorDTO> InstalledSensors = new ConcurrentBag<SensorDTO>();
+        public static List<SensorConfig> InstalledSensors = new List<SensorConfig>();
 
         public static DateTime TimeNow()
         {

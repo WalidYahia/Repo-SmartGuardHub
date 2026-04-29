@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartGuardHub.Application;
 using SmartGuardHub.Cloud;
 using SmartGuardHub.Configuration;
+using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
@@ -19,27 +20,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 if (builder.Environment.IsDevelopment())
 {
-    builder.Services.AddDbContext<SmartGuardDbContext>(options =>
-        options.UseSqlite(builder.Configuration.GetConnectionString("MainDatabaseConnection")));
-
     builder.Services.AddDbContext<SystemLogDbContext>(options =>
         options.UseSqlite(builder.Configuration.GetConnectionString("SystemLogDatabaseConnection")));
 }
 else
 {
-    // Resolve full absolute paths for both databases
-    var mainDatabasePath = builder.Configuration.GetConnectionString("MainDatabasePath");
     var systemLogDatabasePath = builder.Configuration.GetConnectionString("SystemLogDatabasePath");
-
-    // Register contexts with corrected absolute paths
-    builder.Services.AddDbContext<SmartGuardDbContext>(options =>
-        options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, mainDatabasePath)}"));
-
     builder.Services.AddDbContext<SystemLogDbContext>(options =>
         options.UseSqlite($"Data Source={Path.Combine(AppContext.BaseDirectory, systemLogDatabasePath)}"));
 }
 
 builder.Services.AddSingleton<IUserScenarioRepository, JsonUserScenarioRepository>();
+builder.Services.AddSingleton<ISensorConfigRepository, JsonSensorConfigRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -103,8 +95,6 @@ builder.Services.AddScoped<UserCommand, GetInfoCommand>();
 builder.Services.AddScoped<UserCommand, LoadAllUnitsCommand>();
 
 
-// Protocols
-builder.Services.AddScoped<IDeviceRepository, DeviceRepository>();
 builder.Services.AddScoped<ISystemUnit, SonOffMiniR>();
 builder.Services.AddScoped<IAsyncInitializer, DeviceService>();
 
@@ -147,13 +137,6 @@ if (!Directory.Exists(dbPath))
 {
     Directory.CreateDirectory(dbPath);
     Console.WriteLine($"Created missing database folder: {dbPath}");
-}
-
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<SmartGuardDbContext>();
-    await context.Database.MigrateAsync();
-    DatabaseSeeder.SeedData(context);
 }
 
 using (var scope = app.Services.CreateScope())

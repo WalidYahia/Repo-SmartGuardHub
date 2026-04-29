@@ -1,4 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SystemDevices;
@@ -15,64 +14,24 @@ namespace SmartGuardHub.Features.UserCommands
         }
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)
-        {            
-            if (jsonCommand.CommandPayload == null)
+        {
+            if (string.IsNullOrWhiteSpace(jsonCommand.CommandPayload?.Name))
+                return new GeneralResponse { State = DeviceResponseState.DeviceDataIsRequired, DevicePayload = "Device data is required" };
+
+            var sensor = LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
+
+            if (sensor == null)
             {
-                return new GeneralResponse
-                {
-                    State = DeviceResponseState.DeviceDataIsRequired,
-                    DevicePayload = "Device data is required"
-                };
+                await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"Rename - Sensor {jsonCommand.CommandPayload.InstalledSensorId} not found.");
+                return new GeneralResponse { State = DeviceResponseState.NotFound, DevicePayload = "Device not found" };
             }
 
-            if (string.IsNullOrEmpty(jsonCommand.CommandPayload.Name.Trim()))
-            {
-                return new GeneralResponse
-                {
-                    State = DeviceResponseState.DeviceDataIsRequired,
-                    DevicePayload = "Device data is required"
-                };
-            }
+            sensor.DisplayName = jsonCommand.CommandPayload.Name;
 
-            try
-            {
-                var installedDevice = await LoadInstalledSensor(jsonCommand.CommandPayload.InstalledSensorId);
+            var updated = await _deviceService.UpdateDeviceAsync(sensor);
+            await _deviceService.RefreshDevices();
 
-                if (installedDevice != null)
-                {
-                    installedDevice.Name = jsonCommand.CommandPayload.Name;
-
-                    var device = await _deviceService.UpdateDeviceAsync(installedDevice);
-
-                    await _deviceService.RefreshDevices();
-
-                    return new GeneralResponse
-                    {
-                        State = DeviceResponseState.OK,
-                        DevicePayload = device
-                    };
-                }
-                else
-                {
-                    await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"On - Device with ID {jsonCommand.CommandPayload.UnitId}-{(int)jsonCommand.CommandPayload.SwitchNo} not found.");
-
-                    return new GeneralResponse
-                    {
-                        State = DeviceResponseState.NotFound,
-                        DevicePayload = "Device not found"
-                    };
-                }
-            }
-            catch (DbUpdateException ex)
-            {
-                await _loggingService.LogErrorAsync(LogMessageKey.DevicesConflict, $"ConflictError - RenameDevice", ex);
-
-                return new GeneralResponse
-                {
-                    State = DeviceResponseState.Conflict,
-                    DevicePayload = ex.Message
-                };
-            }      
+            return new GeneralResponse { State = DeviceResponseState.OK, DevicePayload = updated };
         }
     }
 }

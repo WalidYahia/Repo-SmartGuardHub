@@ -30,12 +30,6 @@ namespace SmartGuardHub.Application
             // Ensure databases are created and migrated
             using (var scope = _serviceProvider.CreateScope())
             {
-                // Main database
-                var mainContext = scope.ServiceProvider.GetRequiredService<SmartGuardDbContext>();
-                await mainContext.Database.MigrateAsync(cancellationToken);
-                DatabaseSeeder.SeedData(mainContext);
-
-                // System log database
                 var logContext = scope.ServiceProvider.GetRequiredService<SystemLogDbContext>();
                 await logContext.Database.MigrateAsync(cancellationToken);
             }

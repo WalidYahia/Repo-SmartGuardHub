@@ -1,8 +1,6 @@
-﻿using SmartGuardHub.Features.DeviceManagement;
-using SmartGuardHub.Features.Logging;
+﻿using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.UserCommands;
 using SmartGuardHub.Infrastructure;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.UserScenarios
@@ -104,42 +102,31 @@ namespace SmartGuardHub.Features.UserScenarios
 
         private bool EvaluateTime(UserScenarioCondition condition, string targetSensorId, SwitchOutletStatus action)
         {
-            var state = SystemManager.InstalledSensors.FirstOrDefault(o => o.SensorId == targetSensorId);
+            var state = SystemManager.InstalledSensors.FirstOrDefault(o => o.Id == targetSensorId);
             if (state == null) return false;
 
             var now = DateTime.Now.TimeOfDay;
-
-            return
-                Convert.ToInt32(state.LatestValue) != (int)action
-                &&
-                Math.Abs((now - condition.Time).TotalSeconds) < 5;
+            return Convert.ToInt32(state.LastReading ?? "0") != (int)action
+                && Math.Abs((now - condition.Time).TotalSeconds) < 5;
         }
 
         private bool EvaluateDuration(UserScenarioCondition condition, string targetSensorId)
         {
-            var state = SystemManager.InstalledSensors.FirstOrDefault(o => o.SensorId == targetSensorId);
+            var state = SystemManager.InstalledSensors.FirstOrDefault(o => o.Id == targetSensorId);
             if (state == null) return false;
 
-            return
-                Convert.ToInt32(state.LatestValue) == (int)SwitchOutletStatus.On
-                &&
-                (DateTime.Now - state.LastTimeValueSet).TotalSeconds >= condition.DurationInSeconds;
+            return Convert.ToInt32(state.LastReading ?? "0") == (int)SwitchOutletStatus.On
+                && (DateTime.Now - state.LastTimeValueSet).TotalSeconds >= condition.DurationInSeconds;
         }
 
         private bool EvaluateSensor(UserScenarioCondition condition)
         {
             foreach (var sensorCondition in condition.SensorsDependency)
             {
-                var state = SystemManager.InstalledSensors.FirstOrDefault(o => o.SensorId == sensorCondition.SensorId);
-                
-                if (state == null)
-                    return false;
+                var state = SystemManager.InstalledSensors.FirstOrDefault(o => o.Id == sensorCondition.SensorId);
+                if (state == null) return false;
 
-                if (!Compare(
-                        state.LatestValue.ToString(),
-                        sensorCondition.Value,
-                        sensorCondition.Operator,
-                        sensorCondition.SensorType))
+                if (!Compare(state.LastReading ?? "0", sensorCondition.Value, sensorCondition.Operator, sensorCondition.SensorType))
                     return false;
             }
 
