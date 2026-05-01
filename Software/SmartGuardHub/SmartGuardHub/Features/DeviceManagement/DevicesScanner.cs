@@ -28,7 +28,6 @@ namespace SmartGuardHub.Features.DeviceManagement
                         using var scope = _scopeFactory.CreateScope();
                         var deviceService = scope.ServiceProvider.GetRequiredService<DeviceService>();
                         await deviceService.UpdateListDeviceAsync(scanned);
-                        await deviceService.RefreshDevices();
                     }
                 }
                 catch (Exception ex)
@@ -55,14 +54,16 @@ namespace SmartGuardHub.Features.DeviceManagement
                 var sensors = unit.ToList();
                 try
                 {
-                    var systemDevice = await GetSystemUnit(sensors[0].UnitType);
-                    var command = systemDevice.GetInfoCommand(unit.Key);
-                    var response = await systemDevice.SendCommandAsync(sensors[0].Url + systemDevice.InfoPath, SystemManager.Serialize(command));
+                    var systemSensor = GetSystemSensor(sensors[0].SensorType);
+                    var command  = systemSensor.GetInfoCommand(unit.Key);
+                    var response = await systemSensor.SendCommandAsync(
+                        sensors[0].Url + sensors[0].InfoPath,
+                        SystemManager.Serialize(command));
 
                     if (response?.DevicePayload != null)
                     {
                         foreach (var sensor in sensors)
-                            scanned.Add(await systemDevice.MapRawInfoResponseToSensorConfig(response.DevicePayload, sensor));
+                            scanned.Add(await systemSensor.MapRawInfoResponseToSensorConfig(response.DevicePayload, sensor));
                     }
                 }
                 catch (Exception ex)
@@ -76,11 +77,11 @@ namespace SmartGuardHub.Features.DeviceManagement
             return scanned;
         }
 
-        private async Task<ISystemUnit> GetSystemUnit(UnitType unitType)
+        private ISystemSensor GetSystemSensor(int sensorType)
         {
             using var scope = _scopeFactory.CreateScope();
-            var units = scope.ServiceProvider.GetRequiredService<IEnumerable<ISystemUnit>>();
-            return units.FirstOrDefault(d => d.UnitType == unitType);
+            var sensors = scope.ServiceProvider.GetRequiredService<IEnumerable<ISystemSensor>>();
+            return sensors.FirstOrDefault(s => s.SensorType == (SensorType)sensorType);
         }
     }
 }

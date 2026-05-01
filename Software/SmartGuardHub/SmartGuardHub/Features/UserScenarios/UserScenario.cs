@@ -26,7 +26,7 @@ namespace SmartGuardHub.Features.UserScenarios
     public class UserScenarioSensor
     {
         public string SensorId { get; set; }
-        public UnitType SensorType { get; set; }
+        public int SensorType { get; set; }  // matches SensorConfig.SensorType (0 = Swich)
         public string Value { get; set; }
         public ScenarioOperator Operator { get; set; }
     }

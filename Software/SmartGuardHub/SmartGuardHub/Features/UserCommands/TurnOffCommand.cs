@@ -8,8 +8,8 @@ namespace SmartGuardHub.Features.UserCommands
 {
     public class TurnOffCommand : UserCommand
     {
-        public TurnOffCommand(IEnumerable<ISystemUnit> systemUnits, LoggingService loggingService, DeviceService deviceService)
-            : base(systemUnits, loggingService, deviceService)
+        public TurnOffCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
+            : base(systemSensors, loggingService, deviceService)
         {
             jsonCommandType = Enums.JsonCommandType.TurnOff;
         }
@@ -20,20 +20,18 @@ namespace SmartGuardHub.Features.UserCommands
 
             if (sensor != null)
             {
-                var systemDevice = await LoadSystemUnit(sensor.UnitType);
-                var command = systemDevice.GetOffCommand(sensor.UnitId, (SwitchOutlet)sensor.SwitchNo);
-                var result = await systemDevice.SendCommandAsync(sensor.Url + systemDevice.DataPath, SystemManager.Serialize(command));
+                var systemSensor = LoadSystemSensor(sensor.SensorType);
+                var command = systemSensor.GetOffCommand(sensor.UnitId, (SwitchOutlet)sensor.SwitchNo);
+                var result  = await systemSensor.SendCommandAsync(sensor.Url + sensor.DataPath, SystemManager.Serialize(command));
 
                 if (result.State == DeviceResponseState.OK)
                 {
                     sensor.LastReading      = ((int)SwitchOutletStatus.Off).ToString();
                     sensor.LastSeen         = DateTime.Now;
                     sensor.LastTimeValueSet = DateTime.Now;
+                    result.DevicePayload    = sensor;
 
-                    result.DevicePayload = sensor;
-
-                    _deviceService.UpdateDeviceAsync(sensor);
-                    _deviceService.RefreshDevices();
+                    await _deviceService.UpdateDeviceAsync(sensor);
                 }
 
                 return result;

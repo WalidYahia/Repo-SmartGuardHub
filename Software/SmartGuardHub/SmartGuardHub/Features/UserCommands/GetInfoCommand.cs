@@ -7,8 +7,8 @@ namespace SmartGuardHub.Features.UserCommands
 {
     public class GetInfoCommand : UserCommand
     {
-        public GetInfoCommand(IEnumerable<ISystemUnit> systemUnits, LoggingService loggingService, DeviceService deviceService)
-            : base(systemUnits, loggingService, deviceService)
+        public GetInfoCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
+            : base(systemSensors, loggingService, deviceService)
         {
             jsonCommandType = Enums.JsonCommandType.GetInfo;
         }
@@ -19,8 +19,8 @@ namespace SmartGuardHub.Features.UserCommands
 
             if (sensor != null)
             {
-                var systemDevice = await LoadSystemUnit(sensor.UnitType);
-                return await GetInfoResponse(sensor.Url, systemDevice, jsonCommand.CommandPayload);
+                var systemSensor = LoadSystemSensor(sensor.SensorType);
+                return await GetInfoResponse(sensor, systemSensor);
             }
 
             await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"GetInfo - Sensor {jsonCommand.CommandPayload.InstalledSensorId} not found.");

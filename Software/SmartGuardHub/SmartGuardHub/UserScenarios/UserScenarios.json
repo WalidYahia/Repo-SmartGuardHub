@@ -52,7 +52,7 @@
         "SensorsDependency": [
           {
             "SensorId": "10016ca843_1",
-            "SensorType": "SonoffMiniR3",
+            "SensorType": 1,
             "Value": "1",
             "Operator": "Equals"
           }

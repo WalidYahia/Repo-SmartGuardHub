@@ -95,7 +95,8 @@ builder.Services.AddScoped<UserCommand, GetInfoCommand>();
 builder.Services.AddScoped<UserCommand, LoadAllUnitsCommand>();
 
 
-builder.Services.AddScoped<ISystemUnit, SonOffMiniR>();
+builder.Services.AddScoped<ISystemSensor, SonOffMiniR3Switch>();
+builder.Services.AddSingleton<ISensorUnitDefinitionRepository, JsonSensorUnitDefinitionRepository>();
 builder.Services.AddScoped<IAsyncInitializer, DeviceService>();
 
 builder.Services.AddScoped<ISystemLogRepository, SystemLogRepository>();

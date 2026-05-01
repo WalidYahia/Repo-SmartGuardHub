@@ -1,0 +1,30 @@
+[
+  {
+    "name": "SonoffMiniR3",
+    "sensorType": 1,
+    "connectionProtocol": 0,
+    "protocolType": 2,
+    "baseUrl": "http://eWeLink_",
+    "portNo": "8081",
+    "dataPath": "/zeroconf/switches",
+    "infoPath": "/zeroconf/info",
+    "inchingPath": "/zeroconf/pulses",
+    "syncPeriodicity": null,
+    "eventChangeSync": false,
+    "eventChangeDelta": null
+  },
+  {
+    "name": "SonoffMiniR4M",
+    "sensorType": 1,
+    "connectionProtocol": 0,
+    "protocolType": 2,
+    "baseUrl": "http://eWeLink_",
+    "portNo": "8081",
+    "dataPath": "/zeroconf/switches",
+    "infoPath": "/zeroconf/info",
+    "inchingPath": "/zeroconf/pulses",
+    "syncPeriodicity": null,
+    "eventChangeSync": false,
+    "eventChangeDelta": null
+  }
+]

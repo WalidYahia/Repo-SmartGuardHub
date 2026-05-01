@@ -8,8 +8,8 @@ namespace SmartGuardHub.Features.UserCommands
 {
     public class InchingOnCommand : UserCommand
     {
-        public InchingOnCommand(IEnumerable<ISystemUnit> systemUnits, LoggingService loggingService, DeviceService deviceService)
-            : base(systemUnits, loggingService, deviceService)
+        public InchingOnCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
+            : base(systemSensors, loggingService, deviceService)
         {
             jsonCommandType = Enums.JsonCommandType.InchingOn;
         }
@@ -23,24 +23,23 @@ namespace SmartGuardHub.Features.UserCommands
 
             if (sensor != null)
             {
-                var systemDevice = await LoadSystemUnit(sensor.UnitType);
-                var infoResponse = await GetInfoResponse(sensor.Url, systemDevice, jsonCommand.CommandPayload);
-                var inchingCommand = systemDevice.GetOnInchingCommand(sensor.UnitId, (SwitchOutlet)sensor.SwitchNo,
+                var systemSensor = LoadSystemSensor(sensor.SensorType);
+                var infoResponse = await GetInfoResponse(sensor, systemSensor);
+                var inchingCommand = systemSensor.GetOnInchingCommand(
+                    sensor.UnitId, (SwitchOutlet)sensor.SwitchNo,
                     jsonCommand.CommandPayload.InchingTimeInMs,
                     (infoResponse.DevicePayload as SonoffMiniRResponsePayload).Data.Pulses);
 
-                var result = await systemDevice.SendCommandAsync(sensor.Url + systemDevice.InchingPath, SystemManager.Serialize(inchingCommand));
+                var result = await systemSensor.SendCommandAsync(sensor.Url + sensor.InchingPath, SystemManager.Serialize(inchingCommand));
 
                 if (result.State == DeviceResponseState.OK)
                 {
-                    sensor.IsInInchingMode    = true;
+                    sensor.IsInInchingMode      = true;
                     sensor.InchingModeWidthInMs = jsonCommand.CommandPayload.InchingTimeInMs;
-                    sensor.LastSeen           = DateTime.Now;
+                    sensor.LastSeen             = DateTime.Now;
+                    result.DevicePayload        = sensor;
 
-                    result.DevicePayload = sensor;
-
-                    _deviceService.UpdateDeviceAsync(sensor);
-                    _deviceService.RefreshDevices();
+                    await _deviceService.UpdateDeviceAsync(sensor);
                 }
 
                 return result;

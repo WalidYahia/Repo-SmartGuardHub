@@ -2,13 +2,6 @@
 {
     public class Enums
     {
-        public enum UnitType
-        {
-            Unknown = -1,
-            SonoffMiniR3 = 0,
-            SonoffMiniR4M = 1,
-        }
-
         public enum SwitchOutlet
         {
             Unknown = -1,
@@ -35,16 +28,17 @@
         // Matches cloud SensorType enum — used for deterministic ID generation
         public enum SensorType
         {
-            Swich       = 0,
-            Temperature = 1,
-            Humidity    = 2,
-            Pressure    = 3,
-            Motion      = 4,
-            Gas         = 5,
-            Light       = 6,
-            Vibration   = 7,
-            Current     = 8,
-            Voltage     = 9,
+            Unknown = 0,
+            SonOffMiniR3Swich       = 1,
+            Temperature = 2,
+            Humidity    = 3,
+            Pressure    = 4,
+            Motion      = 5,
+            Gas         = 6,
+            Light       = 7,
+            Vibration   = 8,
+            Current     = 9,
+            Voltage     = 10,
         }
 
         public enum SwitchOutletStatus

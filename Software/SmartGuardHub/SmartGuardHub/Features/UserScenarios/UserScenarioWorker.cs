@@ -133,25 +133,12 @@ namespace SmartGuardHub.Features.UserScenarios
             return true;
         }
 
-        private bool Compare(
-        string current,
-        string expected,
-        ScenarioOperator op,
-        UnitType type)
+        private bool Compare(string current, string expected, ScenarioOperator op, int sensorType)
         {
-            return type switch
-            {
-                UnitType.SonoffMiniR3 =>
-                    CompareBool(current, expected, op),
-
-                UnitType.SonoffMiniR4M =>
-                    CompareBool(current, expected, op),
-
-                UnitType.Unknown =>
-                    CompareDouble(current, expected, op),
-
-                _ => current == expected
-            };
+            // SonOffMiniR3Swich (1) is boolean on/off; all others are numeric
+            return sensorType == (int)Enums.SensorType.SonOffMiniR3Swich
+                ? CompareBool(current, expected, op)
+                : CompareDouble(current, expected, op);
         }
 
         private bool CompareBool(string c, string e, ScenarioOperator op)

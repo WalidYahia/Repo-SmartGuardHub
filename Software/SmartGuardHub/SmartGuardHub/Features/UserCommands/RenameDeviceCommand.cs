@@ -7,8 +7,8 @@ namespace SmartGuardHub.Features.UserCommands
 {
     public class RenameDeviceCommand : UserCommand
     {
-        public RenameDeviceCommand(IEnumerable<ISystemUnit> systemUnits, LoggingService loggingService, DeviceService deviceService)
-            : base(systemUnits, loggingService, deviceService)
+        public RenameDeviceCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
+            : base(systemSensors, loggingService, deviceService)
         {
             jsonCommandType = Enums.JsonCommandType.RenameDevice;
         }
@@ -29,8 +29,6 @@ namespace SmartGuardHub.Features.UserCommands
             sensor.DisplayName = jsonCommand.CommandPayload.Name;
 
             var updated = await _deviceService.UpdateDeviceAsync(sensor);
-            await _deviceService.RefreshDevices();
-
             return new GeneralResponse { State = DeviceResponseState.OK, DevicePayload = updated };
         }
     }

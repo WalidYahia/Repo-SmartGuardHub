@@ -1,4 +1,4 @@
-﻿using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.SystemDevices;
@@ -10,69 +10,55 @@ namespace SmartGuardHub.Features.UserCommands
 {
     public abstract class UserCommand
     {
-        protected readonly IEnumerable<ISystemUnit> _systemUnits;
+        protected readonly IEnumerable<ISystemSensor> _systemSensors;
         protected readonly LoggingService _loggingService;
         protected readonly DeviceService _deviceService;
 
         public JsonCommandType jsonCommandType { get; set; }
-        protected UserCommand(IEnumerable<ISystemUnit> systemUnits, LoggingService loggingService, DeviceService deviceService)
+
+        protected UserCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
         {
-            _systemUnits = systemUnits;
+            _systemSensors = systemSensors;
             _loggingService = loggingService;
             _deviceService = deviceService;
         }
 
         protected abstract Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand);
 
-        public async Task<GeneralResponse> ExecuteCommandAsync(JsonCommand jsonCommand) 
+        public async Task<GeneralResponse> ExecuteCommandAsync(JsonCommand jsonCommand)
         {
             if (await RequestIsValid(jsonCommand))
-            {
                 return await ExecuteAsync(jsonCommand);
-            }
-            else
+
+            return new GeneralResponse
             {
-                return new GeneralResponse
-                {
-                    State = DeviceResponseState.DeviceDataIsRequired,
-                    DevicePayload = "Device data is required"
-                };
-            }
+                State = DeviceResponseState.DeviceDataIsRequired,
+                DevicePayload = "Device data is required"
+            };
         }
 
-        protected virtual async Task<bool> RequestIsValid(JsonCommand jsonCommand)
-        {
-            return jsonCommand.CommandPayload == null ? false : true;
-        }
+        protected virtual async Task<bool> RequestIsValid(JsonCommand jsonCommand) =>
+            jsonCommand.CommandPayload != null;
 
-        protected SensorConfig? LoadInstalledSensor(string installedDeviceId) =>
+        protected SensorConfig? LoadInstalledSensor(string? installedDeviceId) =>
             SystemManager.InstalledSensors.FirstOrDefault(d => d.Id == installedDeviceId);
 
-        protected async Task<ISystemUnit> LoadSystemUnit(UnitType deviceType)
-        {
-            var systemDevice = _systemUnits.FirstOrDefault(d => d.UnitType == deviceType);
+        protected ISystemSensor? LoadSystemSensor(int sensorType) =>
+            _systemSensors.FirstOrDefault(s => s.SensorType == (SensorType)sensorType);
 
-            return systemDevice;
-        }
-        protected async Task<GeneralResponse> GetInfoResponse(string installedDeviceUrl, ISystemUnit systemDevice, JsonCommandPayload jsonCommandPayload)
+        protected async Task<GeneralResponse> GetInfoResponse(SensorConfig sensor, ISystemSensor systemSensor)
         {
-            var command = systemDevice.GetInfoCommand(jsonCommandPayload.UnitId);
-            string jsonString = SystemManager.Serialize(command);
-            return await systemDevice.SendCommandAsync(installedDeviceUrl + systemDevice.InfoPath, jsonString);
+            var command = systemSensor.GetInfoCommand(sensor.UnitId);
+            var jsonString = SystemManager.Serialize(command);
+            return await systemSensor.SendCommandAsync(sensor.Url + sensor.InfoPath, jsonString);
         }
     }
 
 
     public class JsonCommand
     {
-        /// <summary>
-        /// A unique identifier for the request
-        /// For mobile app mqtt-subscribe (each mobile app process only recieved ack of its actions).
-        /// </summary>
         public string? RequestId { get; set; }
-
         public JsonCommandType JsonCommandType { get; set; }
-
         public JsonCommandPayload? CommandPayload { get; set; }
     }
 
@@ -83,18 +69,15 @@ namespace SmartGuardHub.Features.UserCommands
         public int? Address { get; set; }
         public int? Port { get; set; }
         public string? InstalledSensorId { get; set; }
-
-        public UnitType UnitType { get; set; } = UnitType.Unknown;
+        public SensorType SensorType { get; set; }
         public string? Name { get; set; }
         public int InchingTimeInMs { get; set; }
-
         public UserScenario? UserScenario { get; set; }
     }
 
     public class UnitMqttPayload
     {
         public string SensorId { get; set; }
-
         public object Value { get; set; }
     }
 }
