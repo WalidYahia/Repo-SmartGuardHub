@@ -10,7 +10,7 @@ namespace SmartGuardHub.Features.UserCommands
         public RenameDeviceCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
             : base(systemSensors, loggingService, deviceService)
         {
-            jsonCommandType = Enums.JsonCommandType.RenameDevice;
+            jsonCommandType = Enums.JsonCommandType.RenameSensor;
         }
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)

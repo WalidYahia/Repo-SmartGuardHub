@@ -1,15 +1,9 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using SmartGuardHub.Features.DeviceManagement;
+﻿using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SensorConfiguration;
-using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Features.UserScenarios;
 using SmartGuardHub.Infrastructure;
-using SmartGuardHub.Protocols;
 using SmartGuardHub.Protocols.MQTT;
-using System.Data;
-using System.Text.Json;
 using static SmartGuardHub.Infrastructure.Enums;
 
 namespace SmartGuardHub.Features.UserCommands
@@ -175,7 +169,13 @@ namespace SmartGuardHub.Features.UserCommands
 
             var saved = await _sensorConfigRepo.SaveAllAsync(configs);
 
-            if (!saved)
+            if (saved)
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var deviceService = scope.ServiceProvider.GetRequiredService<DeviceService>();
+                await deviceService.RefreshDevices(false);
+            }
+            else
                 await _loggingService.LogErrorAsync(LogMessageKey.UserCommandHandler, "CloudSensorConfig - failed to save config", null);
         }
 
@@ -195,18 +195,21 @@ namespace SmartGuardHub.Features.UserCommands
                 await _loggingService.LogErrorAsync(LogMessageKey.UserCommandHandler, "CloudUserScenario - failed to save scenarios", null);
         }
 
-        private async Task UpdateTopic(string sensorId, JsonCommandType jsonCommandType)
+        private async Task UpdateTopic(string installedSensorId, JsonCommandType jsonCommandType)
         {
-            switch (jsonCommandType)
-            {
-                case JsonCommandType.TurnOn:
-                    //_mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.On }, retainFlag: true);
-                    break;
+            //if (jsonCommandType != JsonCommandType.TurnOn && jsonCommandType != JsonCommandType.TurnOff)
+            //    return;
 
-                case JsonCommandType.TurnOff:
-                    //_mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{sensorId}", new UnitMqttPayload { SensorId = sensorId, Value = SwitchOutletStatus.Off }, retainFlag: true);
-                    break;
-            }
+            //var sensor = SystemManager.InstalledSensors.FirstOrDefault(s => s.Id == installedSensorId);
+            //if (sensor == null) return;
+
+            //// Publish numeric state (1 = On, 0 = Off) to data topic so the cloud can update LastReading
+            //var value = jsonCommandType == JsonCommandType.TurnOn
+            //    ? (int)SwitchOutletStatus.On
+            //    : (int)SwitchOutletStatus.Off;
+
+            //var topic = $"Syncro/{sensor.DeviceId}/sensors/{sensor.SensorId}/data";
+            //await _mqttService.PublishAsync(topic, value, retainFlag: true);
         }
     }
 }

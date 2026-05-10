@@ -48,20 +48,21 @@
         }
         public enum JsonCommandType
         {
+            Ping = -1,
+            
             TurnOn = 0,
             TurnOff = 1,
             InchingOn = 2,
             InchingOff = 3,
             GetInfo = 4,
-            CreateDevice = 5,
-            RenameDevice = 6,
-            LoaddAllUnits = 7,
-
+            CreateSensor = 5,
+            RenameSensor = 6,
+            LoaddAllSensors = 7,
 
             SaveUSerScenario = 10,
             DeleteUSerScenario = 11,
 
-            Ping = -1,
+            DeleteSensor = 12,
         }
 
         public enum ScenarioCondition
@@ -132,6 +133,11 @@
             /// Publish from Device
             /// </summary>
             RemoteUpdate_Ack,
+
+            /// <summary>
+            /// Publish from Device
+            /// </summary>
+            Sensors,
         }
     }
 }

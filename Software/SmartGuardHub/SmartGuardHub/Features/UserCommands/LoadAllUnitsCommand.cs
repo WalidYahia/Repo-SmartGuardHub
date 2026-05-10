@@ -10,7 +10,7 @@ namespace SmartGuardHub.Features.UserCommands
         public LoadAllUnitsCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
            : base(systemSensors, loggingService, deviceService)
         {
-            jsonCommandType = Enums.JsonCommandType.LoaddAllUnits;
+            jsonCommandType = Enums.JsonCommandType.LoaddAllSensors;
         }
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand) =>

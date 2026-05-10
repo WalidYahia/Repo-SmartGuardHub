@@ -23,14 +23,16 @@ namespace SmartGuardHub.Features.DeviceManagement
     public class DevicesController : ControllerBase
     {
         private readonly LoggingService _loggingService;
+        private readonly DeviceService _deviceService;
         private readonly UserCommandHandler _userCommandHandler;
         private readonly IMqttService _mqttService;
 
-        public DevicesController(LoggingService loggingService, UserCommandHandler userCommandHandler, IMqttService mqttService)
+        public DevicesController(LoggingService loggingService, UserCommandHandler userCommandHandler, IMqttService mqttService, DeviceService deviceService)
         {
             _loggingService = loggingService;
             _userCommandHandler = userCommandHandler;
             _mqttService = mqttService;
+            _deviceService = deviceService;
         }
 
 
@@ -73,6 +75,12 @@ namespace SmartGuardHub.Features.DeviceManagement
                         {
                             switch (jsonCommand.JsonCommandType)
                             {
+                                case JsonCommandType.CreateSensor:
+                                case JsonCommandType.RenameSensor:
+                                case JsonCommandType.DeleteSensor:
+                                    _deviceService.RefreshDevices();
+                                    break;
+
                                 case JsonCommandType.TurnOn:
                                     //_mqttService.PublishAsync(SystemManager.GetMqttTopicPath(MqttTopics.DeviceDataTopic) + $"/{jsonCommand.CommandPayload.InstalledSensorId}", new UnitMqttPayload { SensorId = jsonCommand.CommandPayload.InstalledSensorId.ToString(), Value = SwitchOutletStatus.On }, retainFlag: true);
                                     break;
@@ -82,6 +90,8 @@ namespace SmartGuardHub.Features.DeviceManagement
                                     break;
                             }
                         }
+
+
 
                         return Ok(result);
                 }

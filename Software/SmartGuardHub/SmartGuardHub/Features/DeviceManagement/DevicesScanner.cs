@@ -28,6 +28,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                         using var scope = _scopeFactory.CreateScope();
                         var deviceService = scope.ServiceProvider.GetRequiredService<DeviceService>();
                         await deviceService.UpdateListDeviceAsync(scanned);
+                        //await deviceService.RefreshDevices();
                     }
                 }
                 catch (Exception ex)

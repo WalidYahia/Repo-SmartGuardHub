@@ -69,7 +69,7 @@ namespace SmartGuardHub.Protocols.MQTT
                 .WithClientId(clientId)
                 .WithCleanSession(false)
                 .WithTlsOptions(tlsOptions)
-                .WithKeepAlivePeriod(TimeSpan.FromSeconds(5)) // Set keep-alive period
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(30)) // Set keep-alive period
                 .Build();
 
             // Set up event handlers
@@ -157,7 +157,6 @@ namespace SmartGuardHub.Protocols.MQTT
                     .Build();
 
                 await _mqttClient.PublishAsync(mqttMessage);
-                await Task.Delay(1000); // Wait for 1 second
 
                 Console.WriteLine($"Published message to topic: {topic}");
             }
@@ -252,11 +251,14 @@ namespace SmartGuardHub.Protocols.MQTT
 
             if (ProcessMessageReceived != null)
             {
-                // Await all attached handlers
-                foreach (var handler in ProcessMessageReceived.GetInvocationList().Cast<Func<MqttMessageModel, Task>>())
+                // Run handlers off the MQTT event loop so keep-alive pings are not blocked
+                _ = Task.Run(async () =>
                 {
-                    await handler(mqttReceivedModel);
-                }
+                    foreach (var handler in ProcessMessageReceived.GetInvocationList().Cast<Func<MqttMessageModel, Task>>())
+                    {
+                        await handler(mqttReceivedModel);
+                    }
+                });
             }
         }
     }

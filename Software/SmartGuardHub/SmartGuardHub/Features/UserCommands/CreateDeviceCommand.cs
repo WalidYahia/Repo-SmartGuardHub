@@ -19,7 +19,7 @@ namespace SmartGuardHub.Features.UserCommands
             : base(systemSensors, loggingService, deviceService)
         {
             _unitDefRepo = unitDefRepo;
-            jsonCommandType = Enums.JsonCommandType.CreateDevice;
+            jsonCommandType = Enums.JsonCommandType.CreateSensor;
         }
 
         protected override async Task<GeneralResponse> ExecuteAsync(JsonCommand jsonCommand)

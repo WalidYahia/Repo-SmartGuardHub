@@ -23,10 +23,13 @@ namespace SmartGuardHub.Features.DeviceManagement
             await RefreshDevices();
         }
 
-        public async Task RefreshDevices()
+        public async Task RefreshDevices(bool publishToCloud = true)
         {
             SystemManager.InstalledSensors = await _repo.GetAllAsync();
-            _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.DeviceSensorConfig), SystemManager.InstalledSensors, retainFlag: true);
+
+            if (publishToCloud)
+                _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.DeviceSensorConfig), SystemManager.InstalledSensors, retainFlag: true);
+
             _logger.LogInformation("Refreshed devices. Total: {Count}", SystemManager.InstalledSensors.Count);
         }
 
@@ -34,7 +37,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         {
             SystemManager.InstalledSensors.Add(sensor);
             await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-            await RefreshDevices();
+            //await RefreshDevices();
             _logger.LogInformation("Created sensor: {Name} ({UnitId}) SW.{SwitchNo}", sensor.DisplayName, sensor.UnitId, sensor.SwitchNo);
             return sensor;
         }
@@ -45,7 +48,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             if (idx < 0) return null;
             SystemManager.InstalledSensors[idx] = sensor;
             await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-            await RefreshDevices();
+            //await RefreshDevices();
             _logger.LogInformation("Updated sensor: {UnitId} SW.{SwitchNo}", sensor.UnitId, sensor.SwitchNo);
             return sensor;
         }
@@ -56,7 +59,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             if (removed)
             {
                 await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-                await RefreshDevices();
+                //await RefreshDevices();
                 _logger.LogInformation("Deleted sensor: {Id}", id);
             }
             return removed;
@@ -76,7 +79,6 @@ namespace SmartGuardHub.Features.DeviceManagement
                 existing.LastTimeValueSet     = scannedSensor.LastTimeValueSet;
             }
             await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-            await RefreshDevices();
             return true;
         }
     }
