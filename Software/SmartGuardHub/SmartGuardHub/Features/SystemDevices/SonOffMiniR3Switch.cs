@@ -1,3 +1,4 @@
+using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
@@ -95,46 +96,40 @@ namespace SmartGuardHub.Features.SystemDevices
                 : new GeneralResponse { State = deviceResponse.State, DevicePayload = payload };
         }
 
-        public async Task<SensorConfig> MapRawInfoResponseToSensorConfig(object rawInfoResponse, SensorConfig sensor)
+        public async Task<List<SensorPollResult>?> GetReadingsAsync(List<SensorConfig> sensors)
         {
-            var unitResponse = rawInfoResponse as SonoffMiniRResponsePayload;
-            var result = ShallowCopy(sensor);
+            if (sensors.Count == 0) return null;
 
-            if (unitResponse?.Data != null)
+            var first    = sensors[0];
+            var command  = GetInfoCommand(first.UnitId);
+            var response = await SendCommandAsync(first.Url + first.InfoPath, SystemManager.Serialize(command));
+
+            if (response is not { State: DeviceResponseState.OK, DevicePayload: SonoffMiniRResponsePayload payload })
+                return null;
+
+            var now = DateTime.UtcNow;
+            return sensors.Select(s => MapReading(s, payload, now)).ToList();
+        }
+
+        private static SensorPollResult MapReading(SensorConfig sensor, SonoffMiniRResponsePayload payload, DateTime now)
+        {
+            var result = new SensorPollResult
+            {
+                SensorId = sensor.Id,
+                IsOnline = true,
+                ReadingTime = now
+            };
+
+            if (payload.Data != null)
             {
                 var switchOutlet = (SwitchOutlet)sensor.SwitchNo;
-
-                var latestValue = Enum.TryParse<SwitchOutletStatus>(
-                    unitResponse.Data.Switches?.FirstOrDefault(o => o.Outlet == (int)switchOutlet)?.Switch, true, out var status)
+                result.Value = Enum.TryParse<SwitchOutletStatus>(
+                    payload.Data.Switches?.FirstOrDefault(o => o.Outlet == (int)switchOutlet)?.Switch, true, out var status)
                     ? ((int)status).ToString()
                     : ((int)SwitchOutletStatus.Off).ToString();
-
-                var inchingData = unitResponse.Data.Pulses?.FirstOrDefault(o => o.Outlet == switchOutlet);
-
-                result.IsOnline             = true;
-                result.IsInInchingMode      = inchingData?.Switch == "on" && inchingData.Pulse == "on";
-                result.InchingModeWidthInMs = inchingData?.Width ?? 0;
-                result.LastTimeValueSet     = latestValue != sensor.LastReading ? DateTime.Now : sensor.LastTimeValueSet;
-                result.LastSeen             = DateTime.Now;
-                result.LastReading          = latestValue;
             }
 
             return result;
         }
-
-        private static SensorConfig ShallowCopy(SensorConfig s) => new SensorConfig
-        {
-            Id = s.Id, DeviceId = s.DeviceId, SensorId = s.SensorId,
-            SwitchNo = s.SwitchNo, UnitId = s.UnitId, Address = s.Address, Port = s.Port,
-            DisplayName = s.DisplayName, Url = s.Url,
-            SensorType = s.SensorType, Protocol = s.Protocol,
-            DataPath = s.DataPath, InfoPath = s.InfoPath, InchingPath = s.InchingPath,
-            SyncPeriodicity = s.SyncPeriodicity, EventChangeSync = s.EventChangeSync,
-            EventChangeDelta = s.EventChangeDelta, InstalledAt = s.InstalledAt,
-            IsActive = s.IsActive, Notes = s.Notes, LastReading = s.LastReading,
-            IsOnline = s.IsOnline, LastSeen = s.LastSeen,
-            IsInInchingMode = s.IsInInchingMode, InchingModeWidthInMs = s.InchingModeWidthInMs,
-            LastTimeValueSet = s.LastTimeValueSet
-        };
     }
 }

@@ -78,7 +78,7 @@ namespace SmartGuardHub.Features.DeviceManagement
                                 case JsonCommandType.CreateSensor:
                                 case JsonCommandType.RenameSensor:
                                 case JsonCommandType.DeleteSensor:
-                                    _deviceService.RefreshDevices();
+                                    _deviceService.RefreshSensors();
                                     break;
 
                                 case JsonCommandType.TurnOn:

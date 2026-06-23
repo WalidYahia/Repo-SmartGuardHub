@@ -60,6 +60,11 @@ namespace SmartGuardHub.Features.UserCommands
         public string? RequestId { get; set; }
         public JsonCommandType JsonCommandType { get; set; }
         public JsonCommandPayload? CommandPayload { get; set; }
+
+        /// <summary>Set to Cloud when the command arrives via MQTT; Local for API calls.</summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
+        public ConfigSource Source { get; set; } = ConfigSource.Local;
     }
 
     public class JsonCommandPayload

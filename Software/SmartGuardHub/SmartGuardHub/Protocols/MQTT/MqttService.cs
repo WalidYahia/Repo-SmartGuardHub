@@ -140,28 +140,34 @@ namespace SmartGuardHub.Protocols.MQTT
             }
         }
 
-        public async Task PublishAsync(string topic, object message, bool retainFlag)
+        public async Task<bool> PublishAsync(string topic, object message, bool retainFlag, MQTTnet.Protocol.MqttQualityOfServiceLevel qos , bool serialize = true)
         {
             await ConnectAsync(3);
 
-            if (_mqttClient.IsConnected)
+            if (!_mqttClient.IsConnected)
             {
-                var json = SystemManager.Serialize(message);
-                var payload = Encoding.UTF8.GetBytes(json);
-
-                var mqttMessage = new MqttApplicationMessageBuilder()
-                    .WithTopic(topic)
-                    .WithPayload(payload)
-                    .WithQualityOfServiceLevel(MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce)
-                    .WithRetainFlag(retainFlag)
-                    .Build();
-
-                await _mqttClient.PublishAsync(mqttMessage);
-
-                Console.WriteLine($"Published message to topic: {topic}");
-            }
-            else
                 await Log(LogLevel.TRACE, LogMessageKey.MqttNotConnected, "PublishAsync");
+                return false;
+            }
+
+            var json = message.ToString();
+
+            if (serialize)
+                json = SystemManager.Serialize(message);
+
+            var payload = Encoding.UTF8.GetBytes(json);
+
+            var mqttMessage = new MqttApplicationMessageBuilder()
+                .WithTopic(topic)
+                .WithPayload(payload)
+                .WithQualityOfServiceLevel(qos)
+                .WithRetainFlag(retainFlag)
+                .Build();
+
+
+            await _mqttClient.PublishAsync(mqttMessage);
+            Console.WriteLine($"Published message to topic: {topic}");
+            return true;
         }
 
         public async Task SubscribeAsync(string topic)

@@ -1,4 +1,4 @@
-﻿using SmartGuardHub.Features.DeviceManagement;
+using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
 using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.UserScenarios;
@@ -24,24 +24,20 @@ namespace SmartGuardHub.Features.UserCommands
             IUserScenarioRepository userScenarioRepository,
             ISensorConfigRepository sensorConfigRepository)
         {
-            _userCommands = userCommands;
-            _loggingService = loggingService;
-
-            _mqttService = mqttService;
-            _scopeFactory = scopeFactory;
-
-            _scenarioRepo = userScenarioRepository;
+            _userCommands     = userCommands;
+            _loggingService   = loggingService;
+            _mqttService      = mqttService;
+            _scopeFactory     = scopeFactory;
+            _scenarioRepo     = userScenarioRepository;
             _sensorConfigRepo = sensorConfigRepository;
         }
 
         public async Task<GeneralResponse> HandleApiUserCommand(JsonCommand jsonCommand)
         {
             if (jsonCommand == null)
-            {
                 return await HandleNullCommand();
-            }
-            else
-                return await ExcuteCommand(jsonCommand);
+
+            return await ExcuteCommand(jsonCommand);
         }
 
         public async Task HandleMqttUserCommand(MqttMessageModel recievedModel)
@@ -67,7 +63,10 @@ namespace SmartGuardHub.Features.UserCommands
                 if (jsonCommand == null)
                 {
                     result = await HandleNullCommand();
+                    return;
                 }
+
+                jsonCommand.Source = ConfigSource.Cloud;
 
                 if (recievedModel.Topic.Contains(MqttTopics.RemoteAction.ToString()))
                 {
@@ -85,95 +84,82 @@ namespace SmartGuardHub.Features.UserCommands
                             break;
                     }
 
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction_Ack), result, retainFlag: false);
+                    _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction_Ack), result, retainFlag: false, qos: MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
                 }
                 else if (recievedModel.Topic.Contains(MqttTopics.RemoteUpdate.ToString()))
                 {
-
+                    // reserved
                 }
-
-                if (result != null && jsonCommand.CommandPayload != null && result.State == DeviceResponseState.OK)
-                    UpdateTopic(jsonCommand.CommandPayload.InstalledSensorId, jsonCommand.JsonCommandType);
             }
             catch (Exception ex)
             {
                 result = new GeneralResponse { State = DeviceResponseState.Error, RequestId = "Failed to parse Json" };
-
-                _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction_Ack), result, retainFlag: false);
+                _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.RemoteAction_Ack), result, retainFlag: false, qos: MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
             }
         }
 
         private async Task<GeneralResponse> ExcuteCommand(JsonCommand jsonCommand)
         {
-            UserCommand? deviceCommand = _userCommands.FirstOrDefault(c => c.jsonCommandType == jsonCommand.JsonCommandType);
-
+            var deviceCommand = _userCommands.FirstOrDefault(c => c.jsonCommandType == jsonCommand.JsonCommandType);
             return await deviceCommand.ExecuteCommandAsync(jsonCommand);
         }
 
         private async Task<GeneralResponse> ExcuteUserScenarioCommand(JsonCommand jsonCommand)
         {
-            GeneralResponse result;
-
             bool saveState = false;
 
             if (jsonCommand.CommandPayload != null && jsonCommand.CommandPayload.UserScenario != null)
             {
                 if (jsonCommand.JsonCommandType == JsonCommandType.SaveUSerScenario)
-                {
                     saveState = await _scenarioRepo.SaveAsync(jsonCommand.CommandPayload.UserScenario);
-                }
                 else if (jsonCommand.JsonCommandType == JsonCommandType.DeleteUSerScenario)
-                {
                     saveState = await _scenarioRepo.DeleteAsync(jsonCommand.CommandPayload.UserScenario.Id);
-                }
-                
+
                 if (saveState)
                 {
-                    result = new GeneralResponse { State = DeviceResponseState.OK };
-                    
                     var scenarios = await _scenarioRepo.GetAllAsync();
-
-                    _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.UserScenario), scenarios, retainFlag: true);
+                    //_mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.UserScenario), scenarios, retainFlag: true);
+                    return new GeneralResponse { State = DeviceResponseState.OK };
                 }
-                else
-                    result = new GeneralResponse { State = DeviceResponseState.Error };
-            }
-            else
-            {
-                result = new GeneralResponse { State = DeviceResponseState.NoContent };
+
+                return new GeneralResponse { State = DeviceResponseState.Error };
             }
 
-            return result;
+            return new GeneralResponse { State = DeviceResponseState.NoContent };
         }
 
         private async Task<GeneralResponse> HandleNullCommand()
         {
-            await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, $"HandleUserCommand - Command Is Null");
-
-            return new GeneralResponse
-            {
-                State = DeviceResponseState.NoContent,
-                DevicePayload = "NoContent"
-            };
+            await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, "HandleUserCommand - Command Is Null");
+            return new GeneralResponse { State = DeviceResponseState.NoContent, DevicePayload = "NoContent" };
         }
 
         private async Task HandleCloudSensorConfigAsync(string payload)
         {
-            var configs = SystemManager.Deserialize<List<SensorConfig>>(payload);
+            var envelope = SystemManager.Deserialize<SensorConfigEnvelope>(payload);
 
-            if (configs == null)
+            if (envelope?.Sensors == null)
             {
                 await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, "CloudSensorConfig - payload is null or invalid");
                 return;
             }
 
-            var saved = await _sensorConfigRepo.SaveAllAsync(configs);
+            var current = await _sensorConfigRepo.GetVersionInfoAsync(ConfigType.Sensor);
+
+            if (current != null &&
+                (envelope.ConfigVersion == current.Value.Version || envelope.UpdateTime <= current.Value.UpdateTime))
+            {
+                await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, "CloudSensorConfig - skipped (version matches or device config is more recent)");
+                return;
+            }
+
+            var saved = await _sensorConfigRepo.SaveAllAsync(envelope.Sensors, ConfigSource.Cloud, envelope.ConfigVersion);
 
             if (saved)
             {
                 using var scope = _scopeFactory.CreateScope();
                 var deviceService = scope.ServiceProvider.GetRequiredService<DeviceService>();
-                await deviceService.RefreshDevices(false);
+                await deviceService.RefreshSensors(publishToCloud: false);
             }
             else
                 await _loggingService.LogErrorAsync(LogMessageKey.UserCommandHandler, "CloudSensorConfig - failed to save config", null);
@@ -193,23 +179,6 @@ namespace SmartGuardHub.Features.UserCommands
 
             if (!saved)
                 await _loggingService.LogErrorAsync(LogMessageKey.UserCommandHandler, "CloudUserScenario - failed to save scenarios", null);
-        }
-
-        private async Task UpdateTopic(string installedSensorId, JsonCommandType jsonCommandType)
-        {
-            //if (jsonCommandType != JsonCommandType.TurnOn && jsonCommandType != JsonCommandType.TurnOff)
-            //    return;
-
-            //var sensor = SystemManager.InstalledSensors.FirstOrDefault(s => s.Id == installedSensorId);
-            //if (sensor == null) return;
-
-            //// Publish numeric state (1 = On, 0 = Off) to data topic so the cloud can update LastReading
-            //var value = jsonCommandType == JsonCommandType.TurnOn
-            //    ? (int)SwitchOutletStatus.On
-            //    : (int)SwitchOutletStatus.Off;
-
-            //var topic = $"Syncro/{sensor.DeviceId}/sensors/{sensor.SensorId}/data";
-            //await _mqttService.PublishAsync(topic, value, retainFlag: true);
         }
     }
 }

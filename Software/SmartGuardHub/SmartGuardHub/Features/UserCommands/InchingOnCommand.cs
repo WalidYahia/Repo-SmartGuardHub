@@ -36,7 +36,6 @@ namespace SmartGuardHub.Features.UserCommands
                 {
                     sensor.IsInInchingMode      = true;
                     sensor.InchingModeWidthInMs = jsonCommand.CommandPayload.InchingTimeInMs;
-                    sensor.LastSeen             = DateTime.Now;
                     result.DevicePayload        = sensor;
 
                     await _deviceService.UpdateDeviceAsync(sensor);

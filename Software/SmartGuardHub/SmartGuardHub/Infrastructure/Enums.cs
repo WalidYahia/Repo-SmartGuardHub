@@ -87,6 +87,18 @@
             Or
         }
 
+        public enum ConfigType
+        {
+            Sensor  = 0,
+            Network = 1,
+        }
+
+        public enum ConfigSource
+        {
+            Local = 0,
+            Cloud = 1,
+        }
+
         public enum MqttTopics
         {
             /// <summary>
@@ -112,7 +124,7 @@
             /// <summary>
             /// Publish from Device
             /// </summary>
-            DeviceData,
+            Readings,
 
             /// <summary>
             /// Publish from Cloud

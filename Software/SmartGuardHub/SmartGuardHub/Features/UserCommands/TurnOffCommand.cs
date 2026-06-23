@@ -1,5 +1,6 @@
 using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.Logging;
+using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.SystemDevices;
 using SmartGuardHub.Infrastructure;
 using static SmartGuardHub.Infrastructure.Enums;
@@ -8,9 +9,16 @@ namespace SmartGuardHub.Features.UserCommands
 {
     public class TurnOffCommand : UserCommand
     {
-        public TurnOffCommand(IEnumerable<ISystemSensor> systemSensors, LoggingService loggingService, DeviceService deviceService)
+        private readonly ISensorReadingRepository _readingRepo;
+
+        public TurnOffCommand(
+            IEnumerable<ISystemSensor> systemSensors,
+            LoggingService loggingService,
+            DeviceService deviceService,
+            ISensorReadingRepository readingRepo)
             : base(systemSensors, loggingService, deviceService)
         {
+            _readingRepo = readingRepo;
             jsonCommandType = Enums.JsonCommandType.TurnOff;
         }
 
@@ -26,19 +34,41 @@ namespace SmartGuardHub.Features.UserCommands
 
                 if (result.State == DeviceResponseState.OK)
                 {
-                    sensor.LastReading      = ((int)SwitchOutletStatus.Off).ToString();
-                    sensor.LastSeen         = DateTime.Now;
-                    sensor.LastTimeValueSet = DateTime.Now;
-                    result.DevicePayload    = sensor;
+                    var now = DateTime.UtcNow;
+                    var previous = await _readingRepo.GetLatestAsync(sensor.Id);
+                    var newValue = ((int)SwitchOutletStatus.Off).ToString();
 
-                    await _deviceService.UpdateDeviceAsync(sensor);
+                    await _readingRepo.SaveAsync(new SensorReadingRecord
+                    {
+                        UnitId        = sensor.UnitId,
+                        SensorId      = sensor.Id,
+                        LogTime       = now,
+                        Reading       = new SensorReadingJson { Value = newValue, Status = SensorStatus.Online, ReadingTime = now }.Serialize(),
+                        IsOnline      = true,
+                        SyncedToCloud = jsonCommand.Source == ConfigSource.Cloud || !sensor.EventChangeSync,
+                        UpdatedFrom   = jsonCommand.Source
+                    });
+
+                    result.DevicePayload = new
+                    {
+                        id = sensor.Id,
+                        deviceId = sensor.DeviceId,
+                        sensorId = sensor.SensorId,
+                        unitId = sensor.UnitId,
+                        displayName = sensor.DisplayName,
+                        sensorType = sensor.SensorType,
+                        isInInchingMode = sensor.IsInInchingMode,
+                        inchingModeWidthInMs = sensor.InchingModeWidthInMs,
+                        lastReading = newValue,
+                        lastSeen = now,
+                    };
                 }
 
                 return result;
             }
 
             await _loggingService.LogTraceAsync(LogMessageKey.DevicesController, $"TurnOff - Sensor {jsonCommand.CommandPayload.InstalledSensorId} not found.");
-            return new GeneralResponse { State = DeviceResponseState.NotFound, DevicePayload = "Device not found" };
+            return new GeneralResponse { State = DeviceResponseState.NotFound };
         }
     }
 }

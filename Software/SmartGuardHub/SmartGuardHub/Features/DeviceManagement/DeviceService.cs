@@ -20,15 +20,31 @@ namespace SmartGuardHub.Features.DeviceManagement
 
         public async Task InitializeAsync()
         {
-            await RefreshDevices();
+            await RefreshSensors();
         }
 
-        public async Task RefreshDevices(bool publishToCloud = true)
+        public async Task RefreshSensors(bool publishToCloud = true)
         {
             SystemManager.InstalledSensors = await _repo.GetAllAsync();
 
             if (publishToCloud)
-                _mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.DeviceSensorConfig), SystemManager.InstalledSensors, retainFlag: true);
+            {
+                var versionInfo = await _repo.GetVersionInfoAsync(ConfigType.Sensor);
+                var envelope = new SensorConfigEnvelope
+                {
+                    ConfigVersion = versionInfo?.Version ?? Guid.NewGuid(),
+                    UpdateTime    = versionInfo?.UpdateTime ?? DateTime.UtcNow,
+                    Sensors       = SystemManager.InstalledSensors
+                };
+
+                await _mqttService.PublishAsync(
+                    SystemManager.GetMqttTopic(MqttTopics.DeviceSensorConfig),
+                    envelope,
+                    retainFlag: true, 
+                    qos: MQTTnet.Protocol.MqttQualityOfServiceLevel.AtMostOnce);
+
+                await _repo.MarkSyncedAsync(ConfigType.Sensor, DateTime.UtcNow);
+            }
 
             _logger.LogInformation("Refreshed devices. Total: {Count}", SystemManager.InstalledSensors.Count);
         }
@@ -36,8 +52,7 @@ namespace SmartGuardHub.Features.DeviceManagement
         public async Task<SensorConfig> CreateDeviceAsync(SensorConfig sensor)
         {
             SystemManager.InstalledSensors.Add(sensor);
-            await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-            //await RefreshDevices();
+            await _repo.SaveAsync(sensor, ConfigSource.Local);
             _logger.LogInformation("Created sensor: {Name} ({UnitId}) SW.{SwitchNo}", sensor.DisplayName, sensor.UnitId, sensor.SwitchNo);
             return sensor;
         }
@@ -47,8 +62,7 @@ namespace SmartGuardHub.Features.DeviceManagement
             var idx = SystemManager.InstalledSensors.FindIndex(s => s.Id == sensor.Id);
             if (idx < 0) return null;
             SystemManager.InstalledSensors[idx] = sensor;
-            await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-            //await RefreshDevices();
+            await _repo.SaveAsync(sensor, ConfigSource.Local);
             _logger.LogInformation("Updated sensor: {UnitId} SW.{SwitchNo}", sensor.UnitId, sensor.SwitchNo);
             return sensor;
         }
@@ -58,28 +72,10 @@ namespace SmartGuardHub.Features.DeviceManagement
             var removed = SystemManager.InstalledSensors.RemoveAll(s => s.Id == id) > 0;
             if (removed)
             {
-                await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-                //await RefreshDevices();
+                await _repo.DeleteAsync(id);
                 _logger.LogInformation("Deleted sensor: {Id}", id);
             }
             return removed;
-        }
-
-        public async Task<bool> UpdateListDeviceAsync(List<SensorConfig> scanned)
-        {
-            foreach (var scannedSensor in scanned)
-            {
-                var existing = SystemManager.InstalledSensors.FirstOrDefault(s => s.Id == scannedSensor.Id);
-                if (existing == null) continue;
-                existing.IsOnline             = scannedSensor.IsOnline;
-                existing.LastSeen             = scannedSensor.LastSeen;
-                existing.LastReading          = scannedSensor.LastReading;
-                existing.IsInInchingMode      = scannedSensor.IsInInchingMode;
-                existing.InchingModeWidthInMs = scannedSensor.InchingModeWidthInMs;
-                existing.LastTimeValueSet     = scannedSensor.LastTimeValueSet;
-            }
-            await _repo.SaveAllAsync(SystemManager.InstalledSensors);
-            return true;
         }
     }
 }

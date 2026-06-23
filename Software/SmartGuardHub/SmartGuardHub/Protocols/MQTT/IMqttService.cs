@@ -4,7 +4,7 @@
     {
         Task StartAsync();
         Task DisconnectAsync();
-        Task PublishAsync(string topic, object message, bool retainFlag);
+        Task<bool> PublishAsync(string topic, object message, bool retainFlag, MQTTnet.Protocol.MqttQualityOfServiceLevel qos, bool serialize = true);
         Task SubscribeAsync(string topic);
 
         Task ConnectAsync(int trialsCount);

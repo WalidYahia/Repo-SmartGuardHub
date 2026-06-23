@@ -20,18 +20,13 @@ namespace SmartGuardHub.Features.SensorConfiguration
         public string InchingPath { get; set; } = string.Empty;
         public int? SyncPeriodicity { get; set; }
         public bool EventChangeSync { get; set; }
+        public bool OnlySaveRecordOnChange { get; set; }
         public double? EventChangeDelta { get; set; }
         public bool IsInInchingMode { get; set; }
         public int InchingModeWidthInMs { get; set; }
         public DateTime InstalledAt { get; set; }
         public bool IsActive { get; set; }
         public string? Notes { get; set; }
-        public string? LastReading { get; set; }
-
-        // Runtime state — managed locally, not persisted to cloud
-        public bool IsOnline { get; set; }
-        public DateTime LastSeen { get; set; }
-        public DateTime LastTimeValueSet { get; set; }
 
         public static string ComputeId(
             string deviceId,

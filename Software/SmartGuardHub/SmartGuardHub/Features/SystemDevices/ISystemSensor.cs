@@ -1,3 +1,4 @@
+using SmartGuardHub.Features.DeviceManagement;
 using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Infrastructure;
 using SmartGuardHub.Protocols;
@@ -19,6 +20,11 @@ namespace SmartGuardHub.Features.SystemDevices
         DeviceRequest GetOffInchingCommand(string unitId, SwitchOutlet switchNo, List<SonoffMiniRPayloadDataPulse> pulses);
 
         GeneralResponse ParseResponse(GeneralResponse deviceResponse);
-        Task<SensorConfig> MapRawInfoResponseToSensorConfig(object rawInfoResponse, SensorConfig sensorConfig);
+
+        /// <summary>
+        /// Polls the physical unit, maps the response for every sensor in the list,
+        /// and returns one result per sensor. Returns null when the unit is unreachable.
+        /// </summary>
+        Task<List<SensorPollResult>?> GetReadingsAsync(List<SensorConfig> sensors);
     }
 }
