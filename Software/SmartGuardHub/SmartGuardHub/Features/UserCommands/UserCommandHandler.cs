@@ -72,12 +72,6 @@ namespace SmartGuardHub.Features.UserCommands
                 {
                     switch (jsonCommand.JsonCommandType)
                     {
-                        case JsonCommandType.SaveUSerScenario:
-                        case JsonCommandType.DeleteUSerScenario:
-                            result = await ExcuteUserScenarioCommand(jsonCommand);
-                            result.RequestId = jsonCommand.RequestId;
-                            break;
-
                         default:
                             result = await ExcuteCommand(jsonCommand);
                             result.RequestId = jsonCommand.RequestId;
@@ -111,16 +105,12 @@ namespace SmartGuardHub.Features.UserCommands
             if (jsonCommand.CommandPayload != null && jsonCommand.CommandPayload.UserScenario != null)
             {
                 if (jsonCommand.JsonCommandType == JsonCommandType.SaveUSerScenario)
-                    saveState = await _scenarioRepo.SaveAsync(jsonCommand.CommandPayload.UserScenario);
+                    saveState = await _scenarioRepo.SaveAsync(jsonCommand.CommandPayload.UserScenario, ConfigSource.Local);
                 else if (jsonCommand.JsonCommandType == JsonCommandType.DeleteUSerScenario)
-                    saveState = await _scenarioRepo.DeleteAsync(jsonCommand.CommandPayload.UserScenario.Id);
+                    saveState = await _scenarioRepo.DeleteAsync(jsonCommand.CommandPayload.UserScenario.Id, ConfigSource.Local);
 
                 if (saveState)
-                {
-                    var scenarios = await _scenarioRepo.GetAllAsync();
-                    //_mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.UserScenario), scenarios, retainFlag: true);
                     return new GeneralResponse { State = DeviceResponseState.OK };
-                }
 
                 return new GeneralResponse { State = DeviceResponseState.Error };
             }
@@ -167,15 +157,24 @@ namespace SmartGuardHub.Features.UserCommands
 
         private async Task HandleCloudUserScenarioAsync(string payload)
         {
-            var scenarios = SystemManager.Deserialize<List<UserScenario>>(payload);
+            var envelope = SystemManager.Deserialize<UserScenarioEnvelope>(payload);
 
-            if (scenarios == null)
+            if (envelope?.Scenarios == null)
             {
                 await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, "CloudUserScenario - payload is null or invalid");
                 return;
             }
 
-            var saved = await _scenarioRepo.SaveAllAsync(scenarios);
+            var current = await _sensorConfigRepo.GetVersionInfoAsync(ConfigType.UserScenario);
+
+            if (current != null &&
+                (envelope.ConfigVersion == current.Value.Version || envelope.UpdateTime <= current.Value.UpdateTime))
+            {
+                await _loggingService.LogTraceAsync(LogMessageKey.UserCommandHandler, "CloudUserScenario - skipped (version matches or device config is more recent)");
+                return;
+            }
+
+            var saved = await _scenarioRepo.SaveAllAsync(envelope.Scenarios, ConfigSource.Cloud, envelope.ConfigVersion);
 
             if (!saved)
                 await _loggingService.LogErrorAsync(LogMessageKey.UserCommandHandler, "CloudUserScenario - failed to save scenarios", null);

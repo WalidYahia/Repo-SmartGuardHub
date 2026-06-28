@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using SmartGuardHub.Features.SensorConfiguration;
 using SmartGuardHub.Features.UserCommands;
 using SmartGuardHub.Features.UserScenarios;
 using SmartGuardHub.Infrastructure;
@@ -14,12 +15,17 @@ namespace SmartGuardHub.Controllers
     public class UserScenarioController : ControllerBase
     {
         private readonly IUserScenarioRepository _scenarioRepo;
+        private readonly ISensorConfigRepository _configRepo;
         private readonly IMqttService _mqttService;
 
-        public UserScenarioController(IUserScenarioRepository scenarioRepo, IMqttService mqttService)
+        public UserScenarioController(
+            IUserScenarioRepository scenarioRepo,
+            ISensorConfigRepository configRepo,
+            IMqttService mqttService)
         {
             _scenarioRepo = scenarioRepo;
-            _mqttService = mqttService;
+            _configRepo   = configRepo;
+            _mqttService  = mqttService;
         }
 
         [HttpPost("saveUserScenario")]
@@ -38,14 +44,8 @@ namespace SmartGuardHub.Controllers
             if (string.IsNullOrWhiteSpace(request.Id))
                 request.Id = Guid.NewGuid().ToString("N");
 
-            var result = await _scenarioRepo.SaveAsync(request);
-
-            if (result)
-            {
-                var scenarios = await _scenarioRepo.GetAllAsync();
-
-                //_mqttService.PublishAsync(SystemManager.GetMqttTopic(MqttTopics.UserScenario), scenarios, retainFlag: true);
-            }
+            await _scenarioRepo.SaveAsync(request, ConfigSource.Local);
+            await PublishScenariosAsync();
 
             return Ok(new
             {
@@ -68,12 +68,35 @@ namespace SmartGuardHub.Controllers
             if (string.IsNullOrWhiteSpace(id))
                 return BadRequest("Scenario Id is required.");
 
-            var deleted = await _scenarioRepo.DeleteAsync(id);
+            var deleted = await _scenarioRepo.DeleteAsync(id, ConfigSource.Local);
 
             if (!deleted)
                 return NotFound($"No scenario found with Id = {id}");
 
+            await PublishScenariosAsync();
+
             return Ok(new { Message = $"User scenario {id} deleted successfully" });
+        }
+
+        private async Task PublishScenariosAsync()
+        {
+            var scenarios   = await _scenarioRepo.GetAllAsync();
+            var versionInfo = await _configRepo.GetVersionInfoAsync(ConfigType.UserScenario);
+
+            var envelope = new UserScenarioEnvelope
+            {
+                ConfigVersion = versionInfo?.Version ?? Guid.NewGuid(),
+                UpdateTime    = versionInfo?.UpdateTime ?? DateTime.UtcNow,
+                Scenarios     = scenarios
+            };
+
+            await _mqttService.PublishAsync(
+                SystemManager.GetMqttTopic(MqttTopics.DeviceUserScenario),
+                envelope,
+                retainFlag: true,
+                qos: MQTTnet.Protocol.MqttQualityOfServiceLevel.AtLeastOnce);
+
+            await _configRepo.MarkSyncedAsync(ConfigType.UserScenario, DateTime.UtcNow);
         }
     }
 }

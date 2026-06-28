@@ -89,8 +89,9 @@
 
         public enum ConfigType
         {
-            Sensor  = 0,
-            Network = 1,
+            Sensor       = 0,
+            Network      = 1,
+            UserScenario = 2,
         }
 
         public enum ConfigSource
@@ -119,7 +120,7 @@
             /// <summary>
             /// Publish from Device
             /// </summary>
-            UserScenario,
+            DeviceUserScenario,
 
             /// <summary>
             /// Publish from Device

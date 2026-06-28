@@ -1,62 +1,33 @@
 [
   {
-    "Id": "2",
+    "Id": "4b454977-a649-459e-a43e-df9b4bd128c6",
     "Name": "Morning",
-    "IsEnabled": false,
-    "TargetSensorId": "10016ca843_0",
+    "IsEnabled": true,
+    "TargetSensorId": "SmartGuard-WALID_SonOffMiniR3Swich_10016ca843_Switch1_address_port",
     "Action": "On",
     "LogicOfConditions": "And",
     "Conditions": [
       {
         "Condition": "OnTime",
         "DurationInSeconds": 50,
-        "Time": "11:08:00",
+        "Time": "07:00:00",
         "SensorsDependency": null
       }
     ]
   },
   {
-    "Id": "3",
-    "Name": "Night",
-    "IsEnabled": true,
-    "TargetSensorId": "10016ca843_0",
-    "Action": "On",
-    "LogicOfConditions": "And",
-    "Conditions": [
-      {
-        "Condition": "OnTime",
-        "DurationInSeconds": 0,
-        "Time": "17:30:00",
-        "SensorsDependency": null
-      }
-    ]
-  },
-  {
-    "Id": "e1273052-07d5-4d74-8236-398a2a576574",
-    "Name": "neesh led day mode",
+    "Id": "84a4a61b-3692-45fc-b184-147d0cb346ee",
+    "Name": "Test From New Mobile App",
     "IsEnabled": false,
-    "TargetSensorId": "10016ca843_0",
+    "TargetSensorId": "SmartGuard-WALID_SonOffMiniR3Swich_10016ca843_Switch1_address_port",
     "Action": "On",
-    "LogicOfConditions": "And",
+    "LogicOfConditions": "Or",
     "Conditions": [
       {
         "Condition": "OnTime",
         "DurationInSeconds": 0,
-        "Time": "10:37:00",
+        "Time": "06:16:00",
         "SensorsDependency": null
-      },
-      {
-        "Condition": "OnOtherSensorValue",
-        "DurationInSeconds": 0,
-        "Time": "00:00:00",
-        "SensorsDependency": [
-          {
-            "SensorId": "10016ca843_1",
-            "SensorType": 1,
-            "Value": "1",
-            "Operator": "Equals"
-          }
-        ]
       }
     ]
   }

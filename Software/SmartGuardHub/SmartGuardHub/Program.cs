@@ -44,7 +44,7 @@ builder.Services.AddDbContextFactory<SmartGuardDbContext>(options =>
 
 builder.Services.AddSingleton<ISensorConfigRepository, DbSensorConfigRepository>();
 builder.Services.AddSingleton<ISensorReadingRepository, SensorReadingRepository>();
-builder.Services.AddSingleton<IUserScenarioRepository, JsonUserScenarioRepository>();
+builder.Services.AddSingleton<IUserScenarioRepository, DbUserScenarioRepository>();
 
 // ── App services ─────────────────────────────────────────────────────────────
 
