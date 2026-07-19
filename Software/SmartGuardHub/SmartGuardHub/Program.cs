@@ -62,6 +62,7 @@ builder.Services.AddHostedService<LogCleanupService>();
 builder.Services.AddHostedService<SensorReadingService>();
 builder.Services.AddHostedService<ConfigSyncService>();
 builder.Services.AddHostedService<UserScenarioWorker>();
+builder.Services.AddHostedService<HeartbeatService>();
 
 // ── User commands ─────────────────────────────────────────────────────────────
 

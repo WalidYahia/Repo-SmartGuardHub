@@ -64,9 +64,9 @@ namespace SmartGuardHub.Migrations.SmartGuardDb
                 column: "SensorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SensorReadings_SensorId_Time",
+                name: "IX_SensorReadings_SensorId_LogTime",
                 table: "SensorReadings",
-                columns: new[] { "SensorId", "Time" });
+                columns: new[] { "SensorId", "LogTime" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_SensorReadings_SyncedToCloud",

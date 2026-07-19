@@ -151,6 +151,11 @@
             /// Publish from Device
             /// </summary>
             Sensors,
+
+            /// <summary>
+            /// Publish from Device
+            /// </summary>
+            Heartbeat,
         }
     }
 }

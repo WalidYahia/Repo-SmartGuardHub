@@ -10,29 +10,12 @@ namespace SmartGuardHub.Migrations.SmartGuardDb
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "ReadingValue",
-                table: "SensorReadings",
-                newName: "Reading");
-
-            migrationBuilder.DropColumn(
-                name: "ValueSetAt",
-                table: "SensorReadings");
+            // Reading column and absence of ValueSetAt are already correct in InitialCreate — no-op.
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "Reading",
-                table: "SensorReadings",
-                newName: "ReadingValue");
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "ValueSetAt",
-                table: "SensorReadings",
-                type: "TEXT",
-                nullable: true);
         }
     }
 }
